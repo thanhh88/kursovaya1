@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.blog.controller.AuthorController"
+            stylesheets="@styles.css">
+
+    <center>
+        <VBox alignment="CENTER">
+            <padding>
+                <Insets top="40" right="20" bottom="40" left="20"/>
+            </padding>
+
+            <VBox spacing="10"
+                  maxWidth="720"
+                  styleClass="card">
+                <padding>
+                    <Insets top="30" right="20" bottom="30" left="20"/>
+                </padding>
+
+                <Label text="Об авторе проекта"
+                       styleClass="label-title"
+                       style="-fx-alignment: center;"/>
+
+                <Separator/>
+
+                <VBox spacing="4" alignment="CENTER_LEFT">
+                    <Label text="Чу Тху Ань"
+                           styleClass="label-section"/>
+
+                    <Label text="Группа: Пи23-2"
+                           styleClass="label-subtitle"/>
+
+                    <Label text="Предмет: Современные технологии"
+                           styleClass="label-subtitle"/>
+                </VBox>
+
+                <Label text="Это учебный проект, созданный для курса по современным технологиям. Здесь собраны возможности чтения, ведения блога и простая аналитика для практики современных технологий разработки."
+                       wrapText="true"
+                       styleClass="label-subtitle"
+                       style="-fx-font-size: 12.5px;"/>
+            </VBox>
+        </VBox>
+    </center>
+
+</BorderPane>

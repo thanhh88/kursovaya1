@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.blog.controller.PostDetailController"
+            stylesheets="@styles.css">
+
+    <!-- ========== TOP BAR ========== -->
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="15" right="15" bottom="10" left="15"/>
+            </padding>
+
+            <Button text="← Назад"
+                    onAction="#handleBackToReader"/>
+
+            <Label text="Детали записи"
+                   styleClass="header-label"/>
+        </HBox>
+    </top>
+
+    <!-- ========== CONTENT ========== -->
+    <center>
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER">
+            <content>
+                <VBox alignment="TOP_CENTER">
+                    <padding>
+                        <Insets top="10" right="15" bottom="15" left="15"/>
+                    </padding>
+
+                    <!-- Main article card -->
+                    <VBox spacing="14"
+                          maxWidth="780"
+                          styleClass="card">
+                        <padding>
+                            <Insets top="16" right="16" bottom="16" left="16"/>
+                        </padding>
+
+                        <!-- THUMBNAIL IMAGE -->
+                        <ImageView fx:id="thumbnailImageView"
+                                   fitWidth="740"
+                                   preserveRatio="true"
+                                   styleClass="post-thumbnail"/>
+
+                        <!-- TITLE -->
+                        <Label fx:id="titleLabel"
+                               wrapText="true"
+                               styleClass="post-title"/>
+
+                        <!-- META INFORMATION -->
+                        <HBox spacing="6">
+                            <Label text="Автор:"
+                                   style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+                            <Label fx:id="authorLabel"
+                                   styleClass="post-meta"/>
+
+                            <Label text="·"
+                                   styleClass="post-meta"/>
+
+                            <Label text="Тема:"
+                                   style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+                            <Label fx:id="topicLabel"
+                                   styleClass="post-meta"/>
+
+                            <Label text="·"
+                                   styleClass="post-meta"/>
+
+                            <Label text="Создано:"
+                                   style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+                            <Label fx:id="createdLabel"
+                                   styleClass="post-meta"/>
+                        </HBox>
+
+                        <!-- VIEWS + SAVE -->
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <HBox spacing="5" alignment="CENTER_LEFT">
+                                <Label text="Просмотры:"
+                                       style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+                                <Label fx:id="viewLabel"
+                                       styleClass="post-meta"/>
+                            </HBox>
+
+                            <HBox spacing="6" alignment="CENTER_LEFT">
+                                <Button fx:id="saveButton"
+                                        text="Сохранить"
+                                        onAction="#handleToggleSave"
+                                        styleClass="button-primary"/>
+                                <Label fx:id="saveInfoLabel"
+                                       styleClass="post-meta"/>
+                            </HBox>
+                        </HBox>
+
+                        <Separator/>
+
+                        <!-- CONTENT TEXT -->
+                        <Label text="Содержание:"
+                               styleClass="label-section"/>
+
+                        <TextArea fx:id="contentArea"
+                                  wrapText="true"
+                                  editable="false"
+                                  prefRowCount="12"
+                                  VBox.vgrow="ALWAYS"/>
+
+                        <Separator/>
+
+                        <!-- COMMENTS SECTION -->
+                        <VBox spacing="8">
+                            <Label text="Комментарии:"
+                                   styleClass="label-section"/>
+
+                            <!-- COMMENTS TABLE -->
+                            <TableView fx:id="commentTable"
+                                       prefHeight="200"
+                                       VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colCommentAuthor"
+                                                 text="Автор" prefWidth="120"/>
+                                    <TableColumn fx:id="colCommentCreated"
+                                                 text="Создано" prefWidth="140"/>
+                                    <TableColumn fx:id="colCommentContent"
+                                                 text="Содержание" prefWidth="420"/>
+                                </columns>
+                            </TableView>
+
+                            <!-- ADD NEW COMMENT -->
+                            <Label text="Добавить комментарий:"
+                                   styleClass="label-section"/>
+
+                            <TextArea fx:id="newCommentArea"
+                                      promptText="Напишите ваш комментарий здесь..."
+                                      wrapText="true"
+                                      prefRowCount="3"/>
+
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Button text="Добавить комментарий"
+                                        onAction="#handleAddComment"
+                                        styleClass="button-primary"/>
+                                <Label fx:id="commentMessageLabel"
+                                       styleClass="label-error"/>
+                            </HBox>
+                        </VBox>
+
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

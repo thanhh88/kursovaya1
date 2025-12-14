@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.blog.controller.DashboardController"
+            prefWidth="1000" prefHeight="600"
+            stylesheets="@styles.css">
+
+    <!-- ========== TOP: Back + Title ========== -->
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="15" right="15" bottom="10" left="15"/>
+            </padding>
+
+            <Button text="← Назад"
+                    onAction="#handleBackToReader"/>
+
+            <Label text="Панель управления"
+                   styleClass="header-label"/>
+        </HBox>
+    </top>
+
+    <!-- ========== CENTER: 2 columns (Reader / Blogger) ========== -->
+    <center>
+        <HBox spacing="15">
+            <padding>
+                <Insets top="10" right="15" bottom="15" left="15"/>
+            </padding>
+
+            <!-- ===== LEFT COLUMN: READER STATS ===== -->
+            <VBox spacing="12" HBox.hgrow="ALWAYS">
+
+                <!-- Row of stats cards (reader) -->
+                <HBox spacing="10">
+                    <!-- Saved posts -->
+                    <VBox spacing="4" styleClass="stats-card card-hover" prefWidth="200">
+                        <Label text="Сохранённые записи" styleClass="stats-label"/>
+                        <Label fx:id="lblReaderSaved"
+                               text="0"
+                               styleClass="stats-value"/>
+                        <Label text="записей в избранном"
+                               styleClass="label-subtitle"
+                               style="-fx-font-size: 11px;"/>
+                    </VBox>
+
+                    <!-- Commented posts -->
+                    <VBox spacing="4" styleClass="stats-card card-hover" prefWidth="200">
+                        <Label text="Комментированные записи" styleClass="stats-label"/>
+                        <Label fx:id="lblReaderCommentedPosts"
+                               text="0"
+                               styleClass="stats-value"/>
+                        <Label text="записей, где вы оставили комментарий"
+                               wrapText="true"
+                               styleClass="label-subtitle"
+                               style="-fx-font-size: 11px;"/>
+                    </VBox>
+
+                    <!-- Viewed posts / streak -->
+                    <VBox spacing="4" styleClass="stats-card card-hover" prefWidth="200">
+                        <Label text="Просмотры и серия" styleClass="stats-label"/>
+                        <Label fx:id="lblReaderViewed"
+                               text="0"
+                               styleClass="stats-value"/>
+                        <HBox spacing="4" alignment="CENTER_LEFT">
+                            <Label text="Серия:" styleClass="label-subtitle" style="-fx-font-size: 11px;"/>
+                            <Label fx:id="lblReaderStreak"
+                                   text="0"
+                                   style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                            <Label text="дней" styleClass="label-subtitle" style="-fx-font-size: 11px;"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Reader activity chart -->
+                <VBox spacing="8" VBox.vgrow="ALWAYS" styleClass="card">
+                    <Label text="Активность чтения (последние 30 дней)"
+                           styleClass="label-section"/>
+                    <LineChart fx:id="readerViewsChart"
+                               prefHeight="220">
+                        <xAxis>
+                            <CategoryAxis label="Дата"/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Количество записей"/>
+                        </yAxis>
+                    </LineChart>
+                </VBox>
+
+                <!-- Reader topics pie chart -->
+                <VBox spacing="8" VBox.vgrow="ALWAYS" styleClass="card">
+                    <Label text="Темы, которые вы чаще всего читаете"
+                           styleClass="label-section"/>
+                    <PieChart fx:id="readerTopicsPieChart"
+                              prefHeight="220"/>
+                </VBox>
+
+            </VBox>
+
+            <!-- ===== RIGHT COLUMN: BLOGGER STATS ===== -->
+            <VBox spacing="12" HBox.hgrow="ALWAYS">
+
+                <!-- Row of stats cards (blogger) -->
+                <HBox spacing="10">
+                    <!-- Total posts -->
+                    <VBox spacing="4" styleClass="stats-card card-hover" prefWidth="180">
+                        <Label text="Всего записей" styleClass="stats-label"/>
+                        <Label fx:id="lblTotalPosts"
+                               text="0"
+                               styleClass="stats-value"/>
+                        <Label text="все ваши записи"
+                               styleClass="label-subtitle"
+                               style="-fx-font-size: 11px;"/>
+                    </VBox>
+
+                    <!-- Published / Draft -->
+                    <VBox spacing="4" styleClass="stats-card card-hover" prefWidth="220">
+                        <Label text="Статус записей" styleClass="stats-label"/>
+                        <HBox spacing="8">
+                            <Label text="Опубликовано:" styleClass="label-subtitle" style="-fx-font-size: 11px;"/>
+                            <Label fx:id="lblPublished" text="0" styleClass="stats-label"/>
+                        </HBox>
+                        <HBox spacing="8">
+                            <Label text="Черновики:" styleClass="label-subtitle" style="-fx-font-size: 11px;"/>
+                            <Label fx:id="lblDraft" text="0" styleClass="stats-label"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Views / Saved / Comments -->
+                    <VBox spacing="4" styleClass="stats-card card-hover" prefWidth="220">
+                        <Label text="Вовлечённость" styleClass="stats-label"/>
+                        <HBox spacing="6">
+                            <Label text="Комментарии:" styleClass="label-subtitle" style="-fx-font-size: 11px;"/>
+                            <Label fx:id="lblComments" text="0" styleClass="stats-label"/>
+                        </HBox>
+                        <HBox spacing="6">
+                            <Label text="Сохранения:" styleClass="label-subtitle" style="-fx-font-size: 11px;"/>
+                            <Label fx:id="lblSaved" text="0" styleClass="stats-label"/>
+                        </HBox>
+                        <HBox spacing="6">
+                            <Label text="Просмотры:" styleClass="label-subtitle" style="-fx-font-size: 11px;"/>
+                            <Label fx:id="lblTotalViews" text="0" styleClass="stats-label"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
+
+                <!-- Blogger posts by topic: pie + table -->
+                <VBox spacing="8" VBox.vgrow="ALWAYS" styleClass="card">
+                    <Label text="Ваши записи по темам"
+                           styleClass="label-section"/>
+
+                    <PieChart fx:id="bloggerTopicsPieChart"
+                              prefHeight="180"/>
+
+                    <TableView fx:id="topicTable" prefHeight="140">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <columns>
+                            <TableColumn fx:id="colTopicName" text="Тема"/>
+                            <TableColumn fx:id="colTopicCount" text="Количество" minWidth="80"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+
+                <!-- Blogger top posts table -->
+                <VBox spacing="8" VBox.vgrow="ALWAYS" styleClass="card">
+                    <Label text="Топ записей по вовлечённости"
+                           styleClass="label-section"/>
+
+                    <TableView fx:id="topPostsTable" prefHeight="220">
+                        <columnResizePolicy>
+                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        </columnResizePolicy>
+                        <columns>
+                            <TableColumn fx:id="colTopTitle" text="Название" minWidth="200"/>
+                            <TableColumn fx:id="colTopViews" text="Просмотры" minWidth="70"/>
+                            <TableColumn fx:id="colTopComments" text="Комментарии" minWidth="80"/>
+                            <TableColumn fx:id="colTopSaved" text="Сохранения" minWidth="80"/>
+                            <TableColumn fx:id="colTopEngagement" text="Вовлечённость" minWidth="90"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+
+            </VBox>
+        </HBox>
+    </center>
+
+    <!-- ========== BOTTOM: Message label ========== -->
+    <bottom>
+        <Label fx:id="messageLabel"
+               styleClass="label-subtitle"
+               style="-fx-text-fill: gray; -fx-padding: 5 10 10 10;"/>
+    </bottom>
+
+</BorderPane>

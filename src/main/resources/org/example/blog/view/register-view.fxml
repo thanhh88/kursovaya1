@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.blog.controller.RegisterController"
+            stylesheets="@styles.css">
+
+    <center>
+        <StackPane>
+            <children>
+                <VBox alignment="CENTER" spacing="20">
+                    <padding>
+                        <Insets top="40" right="40" bottom="40" left="40"/>
+                    </padding>
+
+                    <!-- REGISTER CARD -->
+                    <VBox spacing="18"
+                          minWidth="600"
+                          prefWidth="780"
+                          maxWidth="900"
+                          styleClass="card">
+
+                        <padding>
+                            <Insets top="24" right="32" bottom="24" left="32"/>
+                        </padding>
+
+                        <!-- TITLE -->
+                        <VBox alignment="CENTER" spacing="4">
+                            <Label text="Блог-система"
+                                   styleClass="label-title"/>
+
+                            <Label text="Регистрация аккаунта"
+                                   styleClass="label-subtitle"/>
+                        </VBox>
+
+                        <!-- FORM GRID -->
+                        <GridPane hgap="14" vgap="8">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="180" halignment="RIGHT"/>
+                                <ColumnConstraints halignment="LEFT" hgrow="ALWAYS"/>
+                            </columnConstraints>
+
+                            <!-- Username -->
+                            <Label text="Имя пользователя:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="usernameField"
+                                       promptText="Имя пользователя"
+                                       GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <!-- Password -->
+                            <Label text="Пароль:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <PasswordField fx:id="passwordField"
+                                           promptText="Пароль"
+                                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <!-- Confirm password -->
+                            <Label text="Подтвердите пароль:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <PasswordField fx:id="confirmPasswordField"
+                                           promptText="Подтвердите пароль"
+                                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <!-- Full name -->
+                            <Label text="ФИО:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                            <TextField fx:id="fullNameField"
+                                       promptText="Фамилия Имя Отчество"
+                                       GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                            <!-- Age -->
+                            <Label text="Возраст:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                            <Spinner fx:id="ageSpinner"
+                                     editable="false"
+                                     prefWidth="90"
+                                     GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                            <!-- Gender -->
+                            <Label text="Пол:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                            <ComboBox fx:id="genderCombo"
+                                      promptText="Выберите пол"
+                                      prefWidth="200"
+                                      GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                            <!-- Status -->
+                            <Label text="Статус:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                            <ComboBox fx:id="statusCombo"
+                                      promptText="Студент / Работающий / Другое"
+                                      prefWidth="260"
+                                      GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                            <!-- Country -->
+                            <Label text="Страна:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                            <ComboBox fx:id="countryCombo"
+                                      promptText="Выберите страну"
+                                      prefWidth="220"
+                                      GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+                            <!-- Favorite topics -->
+                            <Label text="Любимые темы:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                            <ListView fx:id="topicListView"
+                                      prefHeight="220"
+                                      maxWidth="Infinity"
+                                      styleClass="topic-picker"
+                                      GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+
+                            <!-- Bio -->
+                            <Label text="Биография:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+                            <TextArea fx:id="bioArea"
+                                      promptText="Краткое описание о себе..."
+                                      wrapText="true"
+                                      prefRowCount="3"
+                                      GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+                        </GridPane>
+
+                        <!-- ACTIONS + MESSAGE -->
+                        <VBox spacing="8">
+                            <HBox spacing="10" alignment="CENTER">
+                                <Button text="Зарегистрироваться"
+                                        onAction="#handleRegister"
+                                        styleClass="button-primary"/>
+
+                                <Button text="Уже есть аккаунт? Войти"
+                                        onAction="#handleBackToLogin"/>
+                            </HBox>
+
+                            <Label fx:id="messageLabel"
+                                   wrapText="true"
+                                   styleClass="label-error"/>
+                        </VBox>
+
+                    </VBox>
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+
+</BorderPane>

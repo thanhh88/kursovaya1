@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.blog.controller.PostFormController"
+            prefWidth="800" prefHeight="520"
+            stylesheets="@styles.css">
+
+    <!-- ========== TOP: Back + Title ========== -->
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="10" right="15" bottom="5" left="15"/>
+            </padding>
+
+            <Button text="← Назад"
+                    onAction="#handleCancel"/>
+
+            <Label text="Форма публикации"
+                   styleClass="header-label"/>
+        </HBox>
+    </top>
+
+    <!-- ========== CENTER: Form card ========== -->
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="8" right="20" bottom="15" left="20"/>
+            </padding>
+
+            <VBox spacing="14"
+                  styleClass="card"
+                  VBox.vgrow="ALWAYS">
+                <padding>
+                    <Insets top="12" right="14" bottom="14" left="14"/>
+                </padding>
+
+                <!-- GRID: Title, Topic, Status, Thumbnail picker -->
+                <GridPane hgap="12" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="130" halignment="RIGHT"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <!-- Заголовок -->
+                    <Label text="Заголовок:"
+                           styleClass="label-section"
+                           GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="titleField"
+                               promptText="Введите заголовок записи"
+                               GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               GridPane.hgrow="ALWAYS"/>
+
+                    <!-- Тема -->
+                    <Label text="Тема:"
+                           styleClass="label-section"
+                           GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="topicCombo"
+                              promptText="Выберите тему"
+                              GridPane.rowIndex="1" GridPane.columnIndex="1"
+                              GridPane.hgrow="ALWAYS"/>
+
+                    <!-- Статус -->
+                    <Label text="Статус:"
+                           styleClass="label-section"
+                           GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="statusCombo"
+                              promptText="Черновик / Опубликовано"
+                              GridPane.rowIndex="2" GridPane.columnIndex="1"
+                              GridPane.hgrow="ALWAYS"/>
+
+                    <!-- Thumbnail picker -->
+                    <Label text="Превью (thumbnail):"
+                           styleClass="label-section"
+                           GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT"
+                          GridPane.rowIndex="3" GridPane.columnIndex="1"
+                          GridPane.hgrow="ALWAYS">
+                        <Button text="Выбрать изображение"
+                                onAction="#handleChooseThumbnail"/>
+                        <Label fx:id="thumbnailFileLabel"
+                               text="Нет выбранного файла"
+                               styleClass="label-subtitle"
+                               style="-fx-font-size: 11px; -fx-text-fill: #64748B;"/>
+                    </HBox>
+
+                    <!-- Thumbnail preview -->
+                    <Label text=""
+                           GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <ImageView fx:id="thumbnailPreview"
+                               GridPane.rowIndex="4" GridPane.columnIndex="1"
+                               fitWidth="260" fitHeight="150"
+                               preserveRatio="true"
+                               styleClass="post-thumbnail"/>
+                </GridPane>
+
+                <!-- CONTENT -->
+                <VBox spacing="6" VBox.vgrow="ALWAYS">
+                    <Label text="Содержание:"
+                           styleClass="label-section"/>
+
+                    <TextArea fx:id="contentArea"
+                              wrapText="true"
+                              promptText="Напишите текст вашей записи здесь..."
+                              prefRowCount="10"
+                              VBox.vgrow="ALWAYS"/>
+                </VBox>
+            </VBox>
+        </VBox>
+    </center>
+
+    <!-- ========== BOTTOM: Actions ========== -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="10"/>
+            </padding>
+
+            <Button fx:id="saveButton"
+                    text="Сохранить"
+                    onAction="#handleSave"
+                    styleClass="button-primary"/>
+
+            <Button text="Отмена"
+                    onAction="#handleCancel"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

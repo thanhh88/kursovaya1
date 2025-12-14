@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.blog.controller.ReaderController"
+            stylesheets="@styles.css">
+
+    <!-- ========== TOP: Search + Advanced Filter (trong card) ========== -->
+    <top>
+        <VBox spacing="8">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <VBox spacing="8" styleClass="card">
+                <!-- Hàng search nhanh + sort -->
+                <HBox spacing="6" alignment="CENTER_LEFT">
+                    <TextField fx:id="searchField"
+                               promptText="Поиск по заголовку / содержанию..."
+                               HBox.hgrow="ALWAYS"/>
+
+                    <Button text="Поиск"
+                            onAction="#handleSearch"/>
+
+                    <Button text="Сбросить"
+                            onAction="#handleResetFilter"/>
+
+                    <Label text="Сортировать по:"
+                           styleClass="label-subtitle"
+                           style="-fx-padding: 0 0 0 10;"/>
+
+                    <ComboBox fx:id="sortBox"
+                              prefWidth="160"/>
+                </HBox>
+
+                <!-- TitledPane: Расширенный фильтр -->
+                <TitledPane text="Расширенный фильтр" expanded="false">
+                    <content>
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="8" right="8" bottom="8" left="8"/>
+                            </padding>
+
+                            <!-- Тема + Автор -->
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Label text="Тема:"/>
+                                <ComboBox fx:id="topicFilterBox"
+                                          prefWidth="220"/>
+
+                                <Label text="Автор:"/>
+                                <TextField fx:id="authorFilterField"
+                                           prefWidth="220"
+                                           promptText="Имя автора"/>
+                            </HBox>
+
+                            <!-- Диапазон дат -->
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Label text="От:"/>
+                                <DatePicker fx:id="fromDatePicker"/>
+
+                                <Label text="До:"/>
+                                <DatePicker fx:id="toDatePicker"/>
+                            </HBox>
+
+                            <!-- Просмотры + комментарии + сохраненные -->
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Label text="Мин. просмотры:"/>
+                                <TextField fx:id="minViewsField"
+                                           prefWidth="80"/>
+
+                                <Label text="Мин. комментарии:"/>
+                                <TextField fx:id="minCommentsField"
+                                           prefWidth="80"/>
+
+                                <CheckBox fx:id="onlySavedCheck"
+                                          text="Только сохраненные записи"/>
+
+                                <Region HBox.hgrow="ALWAYS"/>
+
+                                <Button text="Применить фильтр"
+                                        onAction="#handleAdvancedFilter"/>
+                            </HBox>
+                        </VBox>
+                    </content>
+                </TitledPane>
+            </VBox>
+        </VBox>
+    </top>
+
+    <!-- ========== CENTER: Posts list (post cards) ========== -->
+    <center>
+        <VBox spacing="8" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="0" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" hbarPolicy="NEVER">
+                <content>
+                    <VBox fx:id="postContainer"
+                          spacing="8"
+                          fillWidth="true">
+                        <padding>
+                            <Insets top="4" right="0" bottom="4" left="0"/>
+                        </padding>
+                        <!-- Các post-card sẽ được thêm bằng ReaderController -->
+                    </VBox>
+                </content>
+            </ScrollPane>
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.blog.controller.AccountController"
+            stylesheets="@styles.css">
+
+    <!-- ========== TOP: Back + Title ========== -->
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="15" right="15" bottom="10" left="15"/>
+            </padding>
+
+            <Button text="← Назад"
+                    onAction="#handleBackToMain"/>
+
+            <Label text="Информация об аккаунте"
+                   styleClass="header-label"/>
+        </HBox>
+    </top>
+
+    <!-- ========== CENTER (SCROLLABLE) ========== -->
+    <center>
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    styleClass="scroll-pane-clear">
+
+            <content>
+                <VBox alignment="TOP_CENTER">
+                    <padding>
+                        <Insets top="10" right="20" bottom="20" left="20"/>
+                    </padding>
+
+                    <!-- ========== PROFILE CARD (GIỮ NGUYÊN TỪ FILE CŨ) ========== -->
+                    <VBox spacing="16"
+                          maxWidth="820"
+                          styleClass="card">
+                        <padding>
+                            <Insets top="18" right="20" bottom="18" left="20"/>
+                        </padding>
+
+                        <!-- AVATAR BLOCK -->
+                        <HBox spacing="18" alignment="CENTER_LEFT">
+                            <ImageView fx:id="avatarImageView"
+                                       fitWidth="120"
+                                       fitHeight="120"
+                                       preserveRatio="true">
+                                <clip>
+                                    <Circle radius="60" centerX="60" centerY="60"/>
+                                </clip>
+                            </ImageView>
+
+                            <VBox spacing="6">
+                                <Label text="Аватар"
+                                       styleClass="label-section"/>
+
+                                <Button text="Выбрать фото"
+                                        onAction="#handleChooseAvatar"/>
+
+                                <Label fx:id="avatarFileLabel"
+                                       textFill="#64748B"
+                                       style="-fx-font-size: 11px;"/>
+
+                                <Label text="Изображение хранится локально на вашем компьютере."
+                                       wrapText="true"
+                                       styleClass="label-subtitle"
+                                       style="-fx-font-size: 11px;"/>
+                            </VBox>
+                        </HBox>
+
+                        <Separator/>
+
+                        <!-- FORM GRID -->
+                        <GridPane hgap="14" vgap="8">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="150" halignment="RIGHT"/>
+                                <ColumnConstraints hgrow="ALWAYS"/>
+                            </columnConstraints>
+
+                            <!-- Username -->
+                            <Label text="Имя пользователя:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <Label fx:id="usernameLabel"
+                                   GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <!-- Full name -->
+                            <Label text="ФИО:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <TextField fx:id="fullNameField"
+                                       promptText="Фамилия Имя Отчество"
+                                       GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <!-- Age -->
+                            <Label text="Возраст:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <Spinner fx:id="ageSpinner"
+                                     prefWidth="100"
+                                     GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <!-- Gender -->
+                            <Label text="Пол:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                            <ComboBox fx:id="genderCombo"
+                                      prefWidth="150"
+                                      promptText="Выберите пол"
+                                      GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                            <!-- Status -->
+                            <Label text="Статус (учёба/работа):"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                            <ComboBox fx:id="statusCombo"
+                                      prefWidth="220"
+                                      promptText="Студент / Работающий / Другое"
+                                      GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                            <!-- Country -->
+                            <Label text="Страна:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                            <ComboBox fx:id="countryCombo"
+                                      prefWidth="220"
+                                      promptText="Выберите страну"
+                                      GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                            <!-- Bio -->
+                            <Label text="Биография:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                            <TextArea fx:id="bioArea"
+                                      prefRowCount="3"
+                                      wrapText="true"
+                                      promptText="Краткое описание о себе..."
+                                      GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                            <!-- Favorite topics -->
+                            <Label text="Любимые темы:"
+                                   styleClass="label-section"
+                                   GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                            <ListView fx:id="favoriteTopicsListView"
+                                      prefHeight="120"
+                                      GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+                        </GridPane>
+
+                        <!-- ACTION BAR -->
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button text="Сохранить изменения"
+                                    onAction="#handleSaveProfile"
+                                    prefWidth="220"
+                                    styleClass="button-primary"/>
+
+                            <Label fx:id="messageLabel"
+                                   styleClass="label-error"
+                                   wrapText="true"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </content>
+
+        </ScrollPane>
+    </center>
+
+</BorderPane>

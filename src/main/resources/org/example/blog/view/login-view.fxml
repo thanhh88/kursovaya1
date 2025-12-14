@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.blog.controller.LoginController"
+            stylesheets="@styles.css">
+
+    <center>
+        <StackPane>
+            <children>
+                <VBox alignment="CENTER" spacing="22">
+                    <padding>
+                        <Insets top="60" right="60" bottom="60" left="60"/>
+                    </padding>
+
+                    <VBox alignment="CENTER" spacing="18"
+                          minWidth="520"
+                          prefWidth="620"
+                          maxWidth="680"
+                          styleClass="card auth-card">
+
+                        <padding>
+                            <Insets top="30" right="34" bottom="30" left="34"/>
+                        </padding>
+
+                        <VBox alignment="CENTER" spacing="6">
+                            <Label text="Блог-система" styleClass="auth-title"/>
+                            <Label text="Вход в аккаунт" styleClass="auth-subtitle"/>
+                        </VBox>
+
+                        <VBox spacing="12" fillWidth="true">
+                            <Label text="Имя пользователя" styleClass="label-section"/>
+                            <TextField fx:id="usernameField"
+                                       promptText="Введите имя пользователя"
+                                       maxWidth="Infinity"/>
+
+                            <Label text="Пароль" styleClass="label-section"/>
+                            <PasswordField fx:id="passwordField"
+                                           promptText="Введите пароль"
+                                           maxWidth="Infinity"/>
+
+                            <HBox spacing="10" alignment="CENTER">
+                                <Button text="Войти"
+                                        onAction="#handleLogin"
+                                        styleClass="button-primary"/>
+                                <Button text="Регистрация"
+                                        onAction="#handleShowRegister"/>
+                            </HBox>
+
+                            <Label fx:id="messageLabel"
+                                   wrapText="true"
+                                   styleClass="label-error"/>
+                        </VBox>
+
+                        <Label text="Нет аккаунта? Нажмите «Регистрация», чтобы создать новый."
+                               wrapText="true"
+                               styleClass="label-subtitle"
+                               style="-fx-font-size: 13px;"/>
+                    </VBox>
+
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+
+</BorderPane>

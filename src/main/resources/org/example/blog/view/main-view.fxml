@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.blog.controller.MainController"
+            fx:id="rootPane"
+            stylesheets="@styles.css"
+            prefWidth="960" prefHeight="600">
+
+    <!-- ========== TOP: Welcome + Mode Tabs ========== -->
+    <top>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="15.0" right="20.0" bottom="10.0" left="20.0"/>
+            </padding>
+
+            <!-- Row 1: Greeting -->
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <children>
+                    <Label fx:id="welcomeLabel"
+                           text="Здравствуйте, User"
+                           styleClass="header-label"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                </children>
+            </HBox>
+
+            <!-- Row 2: Mode tabs (centered) -->
+            <HBox spacing="0" alignment="CENTER">
+                <children>
+                    <Button text="ЧИТАТЕЛЬ"
+                            onAction="#openReader"
+                            styleClass="mode-tab"/>
+                    <Button text="БЛОГГЕР"
+                            onAction="#openBlogger"
+                            styleClass="mode-tab"/>
+                </children>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ========== LEFT: Sidebar (navigation) ========== -->
+    <left>
+        <VBox spacing="10.0" alignment="TOP_CENTER">
+            <padding>
+                <Insets top="25.0" right="15.0" bottom="20.0" left="20.0"/>
+            </padding>
+
+            <children>
+                <!-- Sidebar card -->
+                <VBox spacing="10"
+                      maxWidth="240"
+                      styleClass="card">
+                    <padding>
+                        <Insets top="12" right="10" bottom="12" left="10"/>
+                    </padding>
+
+                    <!-- Mini profile text -->
+                    <Label text="Навигация"
+                           styleClass="label-section"/>
+
+                    <Label text="Быстрый доступ к основным разделам"
+                           wrapText="true"
+                           styleClass="label-subtitle"
+                           style="-fx-font-size: 12px;"/>
+
+                    <Separator/>
+
+                    <!-- Navigation buttons -->
+                    <VBox spacing="6">
+                        <Button text="Аккаунт"
+                                maxWidth="Infinity"
+                                onAction="#openAccount"
+                                styleClass="button-sidebar"/>
+
+                        <Button text="Сохранённые записи"
+                                wrapText="true"
+                                maxWidth="Infinity"
+                                onAction="#openSavedPosts"
+                                styleClass="button-sidebar"/>
+
+                        <Button text="Панель управления"
+                                wrapText="true"
+                                maxWidth="Infinity"
+                                onAction="#openDashboard"
+                                styleClass="button-sidebar"/>
+
+                        <Button text="Автор"
+                                maxWidth="Infinity"
+                                onAction="#openAuthor"
+                                styleClass="button-sidebar"/>
+                    </VBox>
+                </VBox>
+
+                <!-- Spacer -->
+                <Region VBox.vgrow="ALWAYS"/>
+
+                <!-- Logout button at bottom -->
+                <Button text="Выход"
+                        maxWidth="240"
+                        onAction="#handleLogout"
+                        styleClass="button-sidebar"/>
+            </children>
+        </VBox>
+    </left>
+
+    <!-- ========== CENTER: Main content area ========== -->
+    <center>
+        <StackPane>
+            <padding>
+                <Insets top="20.0" right="20.0" bottom="20.0" left="10.0"/>
+            </padding>
+            <children>
+                <!-- Placeholder card (sẽ bị thay bằng Reader/Blogger view trong controller) -->
+                <VBox alignment="CENTER" spacing="10"
+                      maxWidth="520"
+                      styleClass="card">
+                    <Label text="Выберите режим работы"
+                           styleClass="label-section"
+                           style="-fx-alignment: center;"/>
+
+                    <Label text="Используйте вкладки «ЧИТАТЕЛЬ» и «БЛОГГЕР» сверху, чтобы переключаться между режимами."
+                           wrapText="true"
+                           styleClass="label-subtitle"/>
+                </VBox>
+            </children>
+        </StackPane>
+    </center>
+
+</BorderPane>

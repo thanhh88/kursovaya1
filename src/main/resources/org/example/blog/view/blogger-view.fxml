@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.blog.controller.BloggerController"
+            prefWidth="900" prefHeight="550"
+            stylesheets="@styles.css">
+
+    <!-- ========== TOP: Title ========== -->
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="15" right="15" bottom="10" left="15"/>
+            </padding>
+
+            <Label text="Режим блоггера"
+                   styleClass="header-label"/>
+
+            <Label text="(управление вашими записями)"
+                   styleClass="label-subtitle"
+                   style="-fx-font-size: 13px;"/>
+        </HBox>
+    </top>
+
+    <!-- ========== CENTER: Actions + Table (card) ========== -->
+    <center>
+        <VBox spacing="10" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="0" right="15" bottom="15" left="15"/>
+            </padding>
+
+            <VBox spacing="10"
+                  VBox.vgrow="ALWAYS"
+                  styleClass="card">
+                <padding>
+                    <Insets top="12" right="12" bottom="12" left="12"/>
+                </padding>
+
+                <!-- ACTION BAR -->
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Button text="Новая запись"
+                            onAction="#handleNewPost"
+                            styleClass="button-primary"/>
+
+                    <Button text="Редактировать"
+                            onAction="#handleEditPost"/>
+
+                    <Button text="Удалить"
+                            onAction="#handleDeletePost"
+                            styleClass="button-accent"/>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Button text="Обновить"
+                            onAction="#handleRefresh"/>
+                </HBox>
+
+                <!-- TABLE: Posts -->
+                <TableView fx:id="postTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colTitle" text="Заголовок" prefWidth="220"/>
+                        <TableColumn fx:id="colTopic" text="Тема" prefWidth="140"/>
+                        <TableColumn fx:id="colStatus" text="Статус" prefWidth="110"/>
+                        <TableColumn fx:id="colCreatedAt" text="Дата создания" prefWidth="150"/>
+                        <TableColumn fx:id="colViews" text="Просмотры" prefWidth="90"/>
+                        <TableColumn fx:id="colComments" text="Комментарии" prefWidth="110"/>
+                        <TableColumn fx:id="colSaved" text="Сохранено" prefWidth="100"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.blog.controller.LandingController"
+            fx:id="rootPane"
+            stylesheets="@styles.css">
+
+    <center>
+        <VBox alignment="CENTER" spacing="34">
+            <padding>
+                <Insets top="60" right="60" bottom="60" left="60"/>
+            </padding>
+
+            <!-- HERO SECTION (GLASS) -->
+            <VBox alignment="CENTER" spacing="22"
+                  maxWidth="1100"
+                  styleClass="glass-panel landing-hero">
+
+                <VBox alignment="CENTER" spacing="10">
+                    <Label text="Добро пожаловать в Blog System!"
+                           styleClass="landing-title"/>
+
+                    <Label text="Читайте статьи, создавайте свои записи, сохраняйте избранное и следите за статистикой."
+                           wrapText="true"
+                           maxWidth="760"
+                           styleClass="landing-subtitle"/>
+                </VBox>
+
+                <HBox alignment="CENTER" spacing="18">
+                    <VBox spacing="6" prefWidth="220" styleClass="stats-card card-hover">
+                        <Label text="👥 Пользователи" styleClass="stats-label"/>
+                        <Label fx:id="lblStatUsers" text="128" styleClass="stats-value"/>
+                        <Label text="активные за последний месяц" styleClass="caption-muted"/>
+                    </VBox>
+
+                    <VBox spacing="6" prefWidth="220" styleClass="stats-card card-hover">
+                        <Label text="✍️ Записи" styleClass="stats-label"/>
+                        <Label fx:id="lblStatPosts" text="542" styleClass="stats-value"/>
+                        <Label text="опубликовано в системе" styleClass="caption-muted"/>
+                    </VBox>
+
+                    <VBox spacing="6" prefWidth="220" styleClass="stats-card card-hover">
+                        <Label text="💬 Комментарии" styleClass="stats-label"/>
+                        <Label fx:id="lblStatComments" text="2 137" styleClass="stats-value"/>
+                        <Label text="обратная связь от читателей" styleClass="caption-muted"/>
+                    </VBox>
+                </HBox>
+
+                <HBox alignment="CENTER" spacing="16">
+                    <Button text="Войти"
+                            onAction="#handleGoToLogin"
+                            styleClass="button-primary landing-cta"/>
+
+                    <Button text="Создать аккаунт"
+                            onAction="#handleGoToRegister"
+                            styleClass="landing-cta"/>
+                </HBox>
+            </VBox>
+
+            <!-- FEATURE CARDS -->
+            <HBox alignment="CENTER" spacing="18">
+                <VBox spacing="10" prefWidth="320" styleClass="card card-hover">
+                    <Label text="Режим читателя" styleClass="label-section"/>
+                    <Label text="Персональная лента по вашим темам, сохранённые записи и удобный поиск."
+                           wrapText="true" styleClass="label-subtitle"/>
+                    <Label text="• Умные фильтры&#10;• Быстрый поиск&#10;• Сохранение в избранное"
+                           wrapText="true" styleClass="muted-list"/>
+                </VBox>
+
+                <VBox spacing="10" prefWidth="320" styleClass="card card-hover">
+                    <Label text="Режим блоггера" styleClass="label-section"/>
+                    <Label text="Создавайте и управляйте своими записями в одном месте."
+                           wrapText="true" styleClass="label-subtitle"/>
+                    <Label text="• Черновики и публикация&#10;• Управление темами&#10;• Статистика вовлечённости"
+                           wrapText="true" styleClass="muted-list"/>
+                </VBox>
+
+                <VBox spacing="10" prefWidth="320" styleClass="card card-hover">
+                    <Label text="Статистика и аналитика" styleClass="label-section"/>
+                    <Label text="Следите за просмотрами, комментариями и сохранениями."
+                           wrapText="true" styleClass="label-subtitle"/>
+                    <Label text="• Панель управления&#10;• Графики активности&#10;• Топ тем и записей"
+                           wrapText="true" styleClass="muted-list"/>
+                </VBox>
+            </HBox>
+
+        </VBox>
+    </center>
+
+</BorderPane>
