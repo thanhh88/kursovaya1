@@ -9,5 +9,5 @@ public class AuthorController implements MainChildController {
         this.mainController = mainController;
     }
 
-    // Никакой логики пока не нужно, информация статическая.
+    // Никакой логики не нужно: информация статическая (в FXML).
 }

@@ -40,6 +40,44 @@
                            styleClass="label-subtitle"/>
                 </VBox>
 
+                <Separator/>
+
+                <!-- Контактные данные (обязательное требование 1.9) -->
+                <VBox spacing="4" alignment="CENTER_LEFT">
+                    <Label text="Контактные данные:"
+                           styleClass="label-section"/>
+                    <Label text="Email: your_email@example.com"
+                           styleClass="label-subtitle"/>
+                    <Label text="Telegram: @your_telegram"
+                           styleClass="label-subtitle"/>
+                </VBox>
+
+                <Separator/>
+
+                <!-- Опыт работы с технологиями (обязательное требование 1.9) -->
+                <VBox spacing="4" alignment="CENTER_LEFT">
+                    <Label text="Опыт работы с технологиями проекта:"
+                           styleClass="label-section"/>
+                    <Label text="Java, JavaFX (UI), Hibernate/JPA (ORM), MySQL, Maven. Реализованы авторизация, роли пользователей, CRUD, поиск/сортировка и статистика."
+                           wrapText="true"
+                           styleClass="label-subtitle"
+                           style="-fx-font-size: 12.5px;"/>
+                </VBox>
+
+                <Separator/>
+
+                <!-- Даты начала и завершения (обязательное требование 1.9) -->
+                <VBox spacing="4" alignment="CENTER_LEFT">
+                    <Label text="Сроки разработки:"
+                           styleClass="label-section"/>
+                    <Label text="Дата начала: 01.10.2025"
+                           styleClass="label-subtitle"/>
+                    <Label text="Дата завершения: 11.12.2025"
+                           styleClass="label-subtitle"/>
+                </VBox>
+
+                <Separator/>
+
                 <Label text="Это учебный проект, созданный для курса по современным технологиям. Здесь собраны возможности чтения, ведения блога и простая аналитика для практики современных технологий разработки."
                        wrapText="true"
                        styleClass="label-subtitle"
