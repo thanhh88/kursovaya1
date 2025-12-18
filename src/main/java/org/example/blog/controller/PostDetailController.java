@@ -15,7 +15,9 @@ import org.example.blog.service.SavedPostService;
 import org.example.blog.service.PostViewService;
 import org.example.blog.session.Session;
 
+import java.net.URL;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 
 public class PostDetailController implements MainChildController {
@@ -62,22 +64,35 @@ public class PostDetailController implements MainChildController {
     private void initialize() {
         contentArea.setEditable(false);
 
+        if (commentTable != null) {
+            commentTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            commentTable.setPlaceholder(new Label("Комментариев пока нет."));
+        }
+
         colCommentAuthor.setCellValueFactory(c ->
                 new SimpleStringProperty(
-                        c.getValue().getAuthor() != null
-                                ? c.getValue().getAuthor().getFullName()
+                        c.getValue() != null && c.getValue().getAuthor() != null
+                                ? safeStr(c.getValue().getAuthor().getFullName(), "(неизвестно)")
                                 : "(неизвестно)"
-                ));
+                )
+        );
 
         colCommentCreated.setCellValueFactory(c ->
                 new SimpleStringProperty(
-                        c.getValue().getCreatedAt() != null
+                        c.getValue() != null && c.getValue().getCreatedAt() != null
                                 ? c.getValue().getCreatedAt().format(formatter)
                                 : ""
-                ));
+                )
+        );
 
         colCommentContent.setCellValueFactory(c ->
-                new SimpleStringProperty(c.getValue().getContent()));
+                new SimpleStringProperty(
+                        c.getValue() != null ? safeStr(c.getValue().getContent(), "") : ""
+                )
+        );
+
+        if (commentMessageLabel != null) commentMessageLabel.setText("");
+        if (saveInfoLabel != null) saveInfoLabel.setText("");
     }
 
     public void setPost(Post post) {
@@ -85,66 +100,103 @@ public class PostDetailController implements MainChildController {
 
         this.currentPost = post;
 
-        loadThumbnail(post.getThumbnailUrl());
+        // load image supports http/file/classpath
+        loadThumbnailSmart(post.getThumbnailUrl());
 
-        titleLabel.setText(post.getTitle());
+        titleLabel.setText(safeStr(post.getTitle(), "(без названия)"));
         authorLabel.setText(post.getAuthor() != null
-                ? post.getAuthor().getFullName()
+                ? safeStr(post.getAuthor().getFullName(), "(неизвестно)")
                 : "(неизвестно)");
         topicLabel.setText(post.getTopic() != null
-                ? post.getTopic().getName()
+                ? safeStr(post.getTopic().getName(), "(без темы)")
                 : "(без темы)");
         createdLabel.setText(post.getCreatedAt() != null
                 ? post.getCreatedAt().format(formatter)
                 : "");
-        contentArea.setText(post.getContent());
+
+        contentArea.setText(safeStr(post.getContent(), ""));
 
         int views = post.getViews() != null ? post.getViews() : 0;
         viewLabel.setText(String.valueOf(views));
 
-        postService.increaseViews(post.getId());
-        viewLabel.setText(String.valueOf(views + 1));
+        if (post.getId() != null) {
+            try {
+                postService.increaseViews(post.getId());
+                viewLabel.setText(String.valueOf(views + 1));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         logReaderView();
         updateSaveButtonState();
         loadComments();
     }
 
-    private void loadThumbnail(String path) {
-        if (path == null || path.isBlank()) {
-            thumbnailImageView.setImage(null);
-            return;
-        }
+    private void loadThumbnailSmart(String path) {
+        Image img = loadImageSmart(path);
+        thumbnailImageView.setImage(img);
+    }
+
+    private Image loadImageSmart(String path) {
+        if (path == null || path.isBlank()) return null;
 
         try {
-            String url;
-            if (path.startsWith("http")) url = path;
-            else if (path.startsWith("file:")) url = path;
-            else url = "file:" + path;
+            if (path.startsWith("http://") || path.startsWith("https://")) {
+                return new Image(path, true);
+            }
 
-            thumbnailImageView.setImage(new Image(url, true));
+            if (path.startsWith("classpath:")) {
+                String rel = path.substring("classpath:".length()); // "/images/..."
+                URL url = getClass().getResource(rel);
+                if (url != null) return new Image(url.toExternalForm(), true);
+                return null;
+            }
+
+            if (path.startsWith("file:")) {
+                return new Image(path, true);
+            }
+
+            return new Image("file:" + path, true);
         } catch (Exception e) {
-            thumbnailImageView.setImage(null);
+            return null;
         }
     }
 
     private void logReaderView() {
+        if (currentPost == null || currentPost.getId() == null) return;
+
         User user = Session.getCurrentUser();
-        if (user == null) return;
+        if (user == null || user.getId() == null) return;
+
         try {
             postViewService.logView(currentPost, user);
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            // не падаем
+        }
     }
 
     private void updateSaveButtonState() {
+        if (currentPost == null || currentPost.getId() == null) {
+            saveButton.setDisable(true);
+            saveInfoLabel.setText("Запись недоступна для сохранения.");
+            return;
+        }
+
         User user = Session.getCurrentUser();
-        if (user == null) {
+        if (user == null || user.getId() == null) {
             saveButton.setDisable(true);
             saveInfoLabel.setText("Войдите в систему, чтобы сохранить запись.");
             return;
         }
 
-        boolean saved = savedPostService.isSaved(currentPost, user);
+        boolean saved;
+        try {
+            saved = savedPostService.isSaved(currentPost, user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            saved = false;
+        }
 
         saveButton.setDisable(false);
         if (saved) {
@@ -157,18 +209,31 @@ public class PostDetailController implements MainChildController {
     }
 
     private void loadComments() {
-        if (currentPost == null) return;
+        if (currentPost == null || currentPost.getId() == null) {
+            commentTable.setItems(FXCollections.observableArrayList(Collections.emptyList()));
+            return;
+        }
 
-        List<Comment> list = commentService.getCommentsByPostId(currentPost.getId());
-        commentTable.setItems(FXCollections.observableArrayList(list));
+        try {
+            List<Comment> list = commentService.getCommentsByPostId(currentPost.getId());
+            commentTable.setItems(FXCollections.observableArrayList(list));
+        } catch (Exception e) {
+            e.printStackTrace();
+            commentTable.setItems(FXCollections.observableArrayList(Collections.emptyList()));
+        }
     }
 
     @FXML
     private void handleAddComment() {
         commentMessageLabel.setText("");
 
+        if (currentPost == null || currentPost.getId() == null) {
+            commentMessageLabel.setText("Запись не найдена.");
+            return;
+        }
+
         User user = Session.getCurrentUser();
-        if (user == null) {
+        if (user == null || user.getId() == null) {
             commentMessageLabel.setText("Войдите в систему, чтобы оставить комментарий.");
             return;
         }
@@ -179,30 +244,56 @@ public class PostDetailController implements MainChildController {
             return;
         }
 
-        commentService.addComment(currentPost, user, text.trim());
-        newCommentArea.clear();
-        commentMessageLabel.setText("Комментарий добавлен.");
-        loadComments();
+        try {
+            commentService.addComment(currentPost, user, text.trim());
+            newCommentArea.clear();
+            commentMessageLabel.setText("Комментарий добавлен.");
+            loadComments();
+        } catch (Exception e) {
+            e.printStackTrace();
+            commentMessageLabel.setText("Ошибка при добавлении комментария.");
+        }
     }
 
     @FXML
     private void handleToggleSave() {
+        if (currentPost == null || currentPost.getId() == null) {
+            saveInfoLabel.setText("Запись не найдена.");
+            return;
+        }
+
         User user = Session.getCurrentUser();
-        if (user == null) {
+        if (user == null || user.getId() == null) {
             saveInfoLabel.setText("Войдите в систему.");
             return;
         }
 
-        boolean saved = savedPostService.isSaved(currentPost, user);
+        try {
+            boolean saved = savedPostService.isSaved(currentPost, user);
 
-        if (saved) savedPostService.unsave(currentPost, user);
-        else savedPostService.save(currentPost, user);
+            if (saved) {
+                savedPostService.unsave(currentPost, user);
+            } else {
+                savedPostService.save(currentPost, user);
+            }
 
-        updateSaveButtonState();
+            updateSaveButtonState();
+        } catch (Exception e) {
+            e.printStackTrace();
+            saveInfoLabel.setText("Ошибка при сохранении записи.");
+        }
     }
 
     @FXML
     private void handleBackToReader() {
-        if (mainController != null) mainController.openReaderPage();
+        if (mainController != null) {
+            mainController.openReaderPage();
+        }
+    }
+
+    private String safeStr(String s, String fallback) {
+        if (s == null) return fallback;
+        String t = s.trim();
+        return t.isEmpty() ? fallback : t;
     }
 }

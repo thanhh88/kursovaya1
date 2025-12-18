@@ -40,34 +40,37 @@ public class RegisterController {
     private static final Pattern USERNAME_PATTERN =
             Pattern.compile("^[a-z0-9_.-]{4,20}$");
 
-    // ФИО: русские буквы + пробел + дефис, длина 3–60
+    // ФИО: буквы + пробел, длина 3–60
     private static final Pattern FULLNAME_PATTERN =
-            Pattern.compile("^[\\p{L}\\s]{3,60}$");
+            Pattern.compile("^[\\p{L}\\s-]{3,60}$");
 
     @FXML
     private void initialize() {
+        messageLabel.setText("");
 
         // Возраст
         ageSpinner.setValueFactory(
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 18));
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 18)
+        );
 
         // Пол
         genderCombo.setItems(FXCollections.observableArrayList(
                 "Мужской", "Женский", "Другое"
         ));
+        genderCombo.getSelectionModel().clearSelection();
 
         // Статус
-        genderCombo.getSelectionModel().clearSelection();
         statusCombo.setItems(FXCollections.observableArrayList(
                 "Школьник / Студент",
                 "Работающий",
                 "Другое"
         ));
+        statusCombo.getSelectionModel().clearSelection();
 
         // Страна
         loadCountries();
 
-        // Темы из БД + UI cho ListView
+        // Темы из БД
         loadTopicsForListView();
     }
 
@@ -85,17 +88,22 @@ public class RegisterController {
             }
         }
 
-        // Сортировка по алфавиту (русский)
         countries.sort(Collator.getInstance(ru));
-
         countryCombo.setItems(FXCollections.observableArrayList(countries));
+        countryCombo.getSelectionModel().clearSelection();
     }
 
-    /** Загружает темы в ListView и настраивает отображение, чтобы было удобно читать. */
+    /** Загружает темы в ListView и настраивает отображение. */
     private void loadTopicsForListView() {
-        List<Topic> topics = topicDAO.findAll();
+        List<Topic> topics;
+        try {
+            topics = topicDAO.findAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            topics = Collections.emptyList();
+            messageLabel.setText("Не удалось загрузить темы из базы данных.");
+        }
 
-        // Sắp xếp theo tên (tiếng Nga) nếu có
         Locale ru = new Locale("ru");
         Collator collator = Collator.getInstance(ru);
         topics.sort((t1, t2) -> {
@@ -108,7 +116,6 @@ public class RegisterController {
         topicListView.setItems(observableTopics);
         topicListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        // Cell factory để mỗi topic hiển thị thoáng + xuống dòng được
         topicListView.setCellFactory(lv -> {
             ListCell<Topic> cell = new ListCell<>() {
                 @Override
@@ -122,41 +129,35 @@ public class RegisterController {
                     }
                 }
             };
-            // Cho phép text wrap và cell tự co theo width ListView
             cell.setWrapText(true);
-            cell.setPrefWidth(0); // để ListView tự tính width và wrap
+            cell.setPrefWidth(0);
             return cell;
         });
     }
 
-    // ---------- КНОПКА "Зарегистрироваться" ----------
+    //  КНОПКА "Зарегистрироваться"
     @FXML
     private void handleRegister() {
-
         messageLabel.setText("");
 
         String username = safeTrim(usernameField.getText()).toLowerCase(Locale.ROOT);
         String password = passwordField.getText() == null ? "" : passwordField.getText();
-        String confirmPassword = confirmPasswordField.getText() == null
-                ? "" : confirmPasswordField.getText();
+        String confirmPassword = confirmPasswordField.getText() == null ? "" : confirmPasswordField.getText();
         String fullName = safeTrim(fullNameField.getText());
         Integer age = ageSpinner.getValue();
         String gender = genderCombo.getValue();
         String status = statusCombo.getValue();
         String country = countryCombo.getValue();
         String bio = bioArea.getText() == null ? "" : bioArea.getText().trim();
-        ObservableList<Topic> selectedTopics =
-                topicListView.getSelectionModel().getSelectedItems();
+        ObservableList<Topic> selectedTopics = topicListView.getSelectionModel().getSelectedItems();
 
-        if (!validateInputs(username, password, confirmPassword, fullName,
-                age, gender, status, country, selectedTopics)) {
+        if (!validateInputs(username, password, confirmPassword, fullName, age, gender, status, country, selectedTopics)) {
             return;
         }
 
-        // Создание entity User
         User u = new User();
         u.setUsername(username);
-        u.setPasswordHash(password); // TODO: hash trong thực tế
+        u.setPasswordHash(password);
         u.setFullName(fullName);
         u.setAge(age);
         u.setGender(gender);
@@ -167,7 +168,15 @@ public class RegisterController {
         Set<Topic> fav = new HashSet<>(selectedTopics);
         u.setFavoriteTopics(fav);
 
-        boolean ok = userService.register(u);
+        boolean ok;
+        try {
+            ok = userService.register(u);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            messageLabel.setText("Ошибка регистрации. Проверьте подключение к БД.");
+            return;
+        }
+
         if (!ok) {
             messageLabel.setText("Имя пользователя уже существует.");
             return;
@@ -177,7 +186,7 @@ public class RegisterController {
         goBackToLogin();
     }
 
-    // ---------- КНОПКА "Уже есть аккаунт? Войти" ----------
+    // КНОПКА "Уже есть аккаунт? Войти"
     @FXML
     private void handleBackToLogin() {
         goBackToLogin();
@@ -189,6 +198,7 @@ public class RegisterController {
                     getClass().getResource("/org/example/blog/view/login-view.fxml")
             );
             Parent newRoot = loader.load();
+
             Stage stage = (Stage) usernameField.getScene().getWindow();
             Scene scene = stage.getScene();
 
@@ -201,7 +211,7 @@ public class RegisterController {
         }
     }
 
-    // ---------- ВАЛИДАЦИЯ ----------
+    // ВАЛИДАЦИЯ
 
     private boolean validateInputs(String username,
                                    String password,
@@ -213,7 +223,6 @@ public class RegisterController {
                                    String country,
                                    List<Topic> selectedTopics) {
 
-        // username
         if (username.isEmpty()) {
             messageLabel.setText("Имя пользователя не может быть пустым.");
             return false;
@@ -225,7 +234,6 @@ public class RegisterController {
             return false;
         }
 
-        // password
         if (password.length() < 6) {
             messageLabel.setText("Пароль слишком короткий (минимум 6 символов).");
             return false;
@@ -235,24 +243,21 @@ public class RegisterController {
             return false;
         }
 
-        // full name
         if (fullName.isEmpty()) {
             messageLabel.setText("ФИО не может быть пустым.");
             return false;
         }
         if (!FULLNAME_PATTERN.matcher(fullName).matches()) {
             messageLabel.setText(
-                    "ФИО должно содержать только русские буквы, пробелы и дефисы (от 3 до 60 символов).");
+                    "ФИО должно содержать только буквы, пробелы и дефисы (от 3 до 60 символов).");
             return false;
         }
 
-        // age
         if (age == null || age < 14) {
             messageLabel.setText("Возраст должен быть не меньше 14 лет.");
             return false;
         }
 
-        // gender / status / country
         if (gender == null || gender.isBlank()) {
             messageLabel.setText("Пожалуйста, выберите пол.");
             return false;
@@ -266,13 +271,11 @@ public class RegisterController {
             return false;
         }
 
-        // topics – минимум 1
         if (selectedTopics == null || selectedTopics.isEmpty()) {
             messageLabel.setText("Выберите хотя бы одну любимую тему.");
             return false;
         }
 
-        // bio
         if (bioArea.getText() != null && bioArea.getText().length() > 1000) {
             messageLabel.setText("Биография слишком длинная (максимум 1000 символов).");
             return false;

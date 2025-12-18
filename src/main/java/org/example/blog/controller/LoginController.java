@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -20,23 +21,18 @@ import java.util.Locale;
 
 public class LoginController {
 
-    @FXML
-    private TextField usernameField;
-
-    @FXML
-    private PasswordField passwordField;
-
-    @FXML
-    private Label messageLabel;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+    @FXML private Label messageLabel;
 
     private final UserService userService = new UserServiceImpl(new UserDaoImpl());
 
     @FXML
     private void initialize() {
-        // nothing special yet
+        messageLabel.setText("");
     }
 
-    // ---------- ВХОД (LOGIN) ----------
+    // ВХОД (LOGIN)
     @FXML
     private void handleLogin(ActionEvent event) {
         messageLabel.setText("");
@@ -44,9 +40,13 @@ public class LoginController {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
+        // giữ logic của bạn: trim + toLowerCase để thống nhất với Register
         if (username != null) {
             username = username.trim().toLowerCase(Locale.ROOT);
+        } else {
+            username = "";
         }
+
         if (password == null) password = "";
 
         if (username.isEmpty() || password.isEmpty()) {
@@ -54,15 +54,22 @@ public class LoginController {
             return;
         }
 
-        User logged = userService.login(username, password);
+        try {
+            User logged = userService.login(username, password);
 
-        if (logged == null) {
-            messageLabel.setText("Неверное имя пользователя или пароль.");
-            return;
+            if (logged == null) {
+                messageLabel.setText("Неверное имя пользователя или пароль.");
+                return;
+            }
+
+            Session.setCurrentUser(logged);
+            openMainView(logged);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showAlert("Ошибка", "Не удалось выполнить вход.",
+                    "Проверьте подключение к базе данных и попробуйте снова.");
         }
-
-        Session.setCurrentUser(logged);
-        openMainView(logged);
     }
 
     private void openMainView(User loggedUser) {
@@ -87,10 +94,12 @@ public class LoginController {
         } catch (IOException e) {
             e.printStackTrace();
             messageLabel.setText("Ошибка при открытии главного окна.");
+            showAlert("Ошибка", "Не удалось открыть главное окно.",
+                    "Попробуйте перезапустить приложение.");
         }
     }
 
-    // ---------- ПЕРЕЙТИ НА РЕГИСТРАЦИЮ ----------
+    // ПЕРЕЙТИ НА РЕГИСТРАЦИЮ
     @FXML
     private void handleShowRegister(ActionEvent event) {
         switchScene("/org/example/blog/view/register-view.fxml",
@@ -111,6 +120,15 @@ public class LoginController {
         } catch (IOException e) {
             e.printStackTrace();
             messageLabel.setText("Не удалось открыть окно: " + title);
+            showAlert("Ошибка", "Не удалось открыть окно.", title);
         }
+    }
+
+    private void showAlert(String title, String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }

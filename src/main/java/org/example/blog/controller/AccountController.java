@@ -1,5 +1,6 @@
 package org.example.blog.controller;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -14,13 +15,9 @@ import org.example.blog.service.UserServiceImpl;
 import org.example.blog.session.Session;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.text.Collator;
+import java.nio.file.*;
+import java.util.*;
 
 public class AccountController implements MainChildController {
 
@@ -50,7 +47,7 @@ public class AccountController implements MainChildController {
     @FXML
     private void initialize() {
         User user = Session.getCurrentUser();
-        if (user == null) {
+        if (user == null || user.getId() == null) {
             messageLabel.setText("Пользователь в текущей сессии не найден!");
             disableForm();
             return;
@@ -59,6 +56,11 @@ public class AccountController implements MainChildController {
         initControls();
 
         List<Topic> allTopics = topicDAO.findAll();
+        // sort topics ru
+        Locale ru = new Locale("ru");
+        Collator coll = Collator.getInstance(ru);
+        allTopics.sort(Comparator.comparing(t -> t.getName() != null ? t.getName() : "", coll));
+
         favoriteTopicsListView.getItems().setAll(allTopics);
 
         fillFormFromUser(user, allTopics);
@@ -69,24 +71,32 @@ public class AccountController implements MainChildController {
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 18)
         );
 
-        // Пол
         genderCombo.getItems().setAll("Мужской", "Женский", "Другое");
+        statusCombo.getItems().setAll("Школьник / Студент", "Работающий", "Другое");
 
-        // Статус
-        statusCombo.getItems().setAll(
-                "Школьник / Студент",
-                "Работающий",
-                "Другое"
-        );
-
-        // Страны
-        countryCombo.getItems().setAll(
-                "Россия", "Вьетнам", "Япония", "Китай", "США",
-                "Таиланд", "Корея", "Великобритания", "Франция", "Германия", "Другая"
-        );
+        loadCountriesRu();
 
         favoriteTopicsListView.getSelectionModel()
                 .setSelectionMode(SelectionMode.MULTIPLE);
+
+        if (avatarFileLabel != null) avatarFileLabel.setText("Нет выбранного файла");
+        if (messageLabel != null) messageLabel.setText("");
+    }
+
+    private void loadCountriesRu() {
+        String[] codes = Locale.getISOCountries();
+        List<String> countries = new ArrayList<>();
+        Locale ru = new Locale("ru");
+
+        for (String code : codes) {
+            Locale loc = new Locale("", code);
+            String name = loc.getDisplayCountry(ru);
+            if (name != null && !name.isBlank()) {
+                countries.add(name);
+            }
+        }
+        countries.sort(Collator.getInstance(ru));
+        countryCombo.setItems(FXCollections.observableArrayList(countries));
     }
 
     private void disableForm() {
@@ -100,26 +110,15 @@ public class AccountController implements MainChildController {
     }
 
     private void fillFormFromUser(User user, List<Topic> allTopics) {
-        usernameLabel.setText(user.getUsername());
+        usernameLabel.setText(safe(user.getUsername(), ""));
 
-        if (user.getFullName() != null) {
-            fullNameField.setText(user.getFullName());
-        }
-        if (user.getAge() != null) {
-            ageSpinner.getValueFactory().setValue(user.getAge());
-        }
-        if (user.getGender() != null) {
-            genderCombo.setValue(user.getGender());
-        }
-        if (user.getStatus() != null) {
-            statusCombo.setValue(user.getStatus());
-        }
-        if (user.getCountry() != null) {
-            countryCombo.setValue(user.getCountry());
-        }
-        if (user.getBio() != null) {
-            bioArea.setText(user.getBio());
-        }
+        fullNameField.setText(safe(user.getFullName(), ""));
+        if (user.getAge() != null) ageSpinner.getValueFactory().setValue(user.getAge());
+
+        if (user.getGender() != null) genderCombo.setValue(user.getGender());
+        if (user.getStatus() != null) statusCombo.setValue(user.getStatus());
+        if (user.getCountry() != null) countryCombo.setValue(user.getCountry());
+        bioArea.setText(safe(user.getBio(), ""));
 
         // avatar
         if (user.getAvatarUrl() != null && !user.getAvatarUrl().isBlank()) {
@@ -130,6 +129,8 @@ public class AccountController implements MainChildController {
             avatarImageView.setImage(null);
         }
 
+        // favorite topics
+        favoriteTopicsListView.getSelectionModel().clearSelection();
         if (user.getFavoriteTopics() != null) {
             for (Topic fav : user.getFavoriteTopics()) {
                 for (Topic item : allTopics) {
@@ -143,9 +144,7 @@ public class AccountController implements MainChildController {
 
     private String shortFileName(String path) {
         int idx = path.lastIndexOf(File.separatorChar);
-        if (idx >= 0 && idx < path.length() - 1) {
-            return path.substring(idx + 1);
-        }
+        if (idx >= 0 && idx < path.length() - 1) return path.substring(idx + 1);
         return path;
     }
 
@@ -157,13 +156,9 @@ public class AccountController implements MainChildController {
             }
 
             String url;
-            if (storedPath.startsWith("http")) {
-                url = storedPath;
-            } else if (storedPath.startsWith("file:")) {
-                url = storedPath;
-            } else {
-                url = "file:" + storedPath;
-            }
+            if (storedPath.startsWith("http")) url = storedPath;
+            else if (storedPath.startsWith("file:")) url = storedPath;
+            else url = "file:" + storedPath;
 
             avatarImageView.setImage(new Image(url, true));
         } catch (Exception e) {
@@ -174,7 +169,7 @@ public class AccountController implements MainChildController {
     @FXML
     private void handleChooseAvatar() {
         User user = Session.getCurrentUser();
-        if (user == null) return;
+        if (user == null || user.getId() == null) return;
 
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Выберите фото для аватара");
@@ -182,9 +177,7 @@ public class AccountController implements MainChildController {
                 new FileChooser.ExtensionFilter("Изображения", "*.png", "*.jpg", "*.jpeg", "*.gif")
         );
 
-        java.io.File selected = chooser.showOpenDialog(
-                avatarImageView.getScene().getWindow()
-        );
+        File selected = chooser.showOpenDialog(avatarImageView.getScene().getWindow());
         if (selected == null) return;
 
         try {
@@ -203,16 +196,17 @@ public class AccountController implements MainChildController {
             avatarFileLabel.setText(selected.getName());
             updateAvatarImage(storedPath);
 
+            messageLabel.setText("Аватар обновлён ✔");
         } catch (Exception ex) {
             ex.printStackTrace();
-            messageLabel.setText("Не удалось сохранить аватар.");
+            showAlert(Alert.AlertType.ERROR, "Ошибка", null, "Не удалось сохранить аватар.");
         }
     }
 
     @FXML
     private void handleSaveProfile() {
         User user = Session.getCurrentUser();
-        if (user == null) {
+        if (user == null || user.getId() == null) {
             messageLabel.setText("Пользователь не существует в сессии.");
             return;
         }
@@ -228,17 +222,21 @@ public class AccountController implements MainChildController {
                 new HashSet<>(favoriteTopicsListView.getSelectionModel().getSelectedItems());
         user.setFavoriteTopics(selectedTopics);
 
-        if (!validateProfile(user)) {
-            return;
-        }
+        if (!validateProfile(user)) return;
 
-        boolean ok = userService.updateProfile(user);
-
-        if (ok) {
-            messageLabel.setText("Изменения сохранены ✔");
-            Session.setCurrentUser(user);
-        } else {
-            messageLabel.setText("Не удалось сохранить изменения. Попробуйте ещё раз.");
+        try {
+            boolean ok = userService.updateProfile(user);
+            if (ok) {
+                messageLabel.setText("Изменения сохранены ✔");
+                // обновим сессию (не меняет логику, просто делает данные “fresh”)
+                User fresh = userService.findById(user.getId());
+                if (fresh != null) Session.setCurrentUser(fresh);
+            } else {
+                messageLabel.setText("Не удалось сохранить изменения. Попробуйте ещё раз.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            messageLabel.setText("Ошибка при сохранении профиля.");
         }
     }
 
@@ -251,6 +249,14 @@ public class AccountController implements MainChildController {
             messageLabel.setText("Возраст указан некорректно.");
             return false;
         }
+        if (user.getCountry() == null || user.getCountry().isBlank()) {
+            messageLabel.setText("Пожалуйста, выберите страну.");
+            return false;
+        }
+        if (user.getFavoriteTopics() == null || user.getFavoriteTopics().isEmpty()) {
+            messageLabel.setText("Выберите хотя бы одну любимую тему.");
+            return false;
+        }
         return true;
     }
 
@@ -259,5 +265,19 @@ public class AccountController implements MainChildController {
         if (mainController != null) {
             mainController.openReaderPage();
         }
+    }
+
+    private String safe(String s, String fallback) {
+        if (s == null) return fallback;
+        String t = s.trim();
+        return t.isEmpty() ? fallback : t;
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String header, String content) {
+        Alert a = new Alert(type);
+        a.setTitle(title);
+        a.setHeaderText(header);
+        a.setContentText(content);
+        a.showAndWait();
     }
 }

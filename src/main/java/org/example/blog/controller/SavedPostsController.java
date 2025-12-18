@@ -4,8 +4,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import org.example.blog.model.Post;
 import org.example.blog.model.User;
 import org.example.blog.session.Session;
@@ -13,24 +11,17 @@ import org.example.blog.util.JpaUtil;
 
 import javax.persistence.EntityManager;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 
 public class SavedPostsController implements MainChildController {
 
-    @FXML
-    private TableView<Post> postTable;
+    @FXML private TableView<Post> postTable;
 
-    @FXML
-    private TableColumn<Post, String> colTitle;
-
-    @FXML
-    private TableColumn<Post, String> colAuthor;
-
-    @FXML
-    private TableColumn<Post, String> colTopic;
-
-    @FXML
-    private TableColumn<Post, String> colCreatedAt;
+    @FXML private TableColumn<Post, String> colTitle;
+    @FXML private TableColumn<Post, String> colAuthor;
+    @FXML private TableColumn<Post, String> colTopic;
+    @FXML private TableColumn<Post, String> colCreatedAt;
 
     private final DateTimeFormatter dateFormatter =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -44,29 +35,34 @@ public class SavedPostsController implements MainChildController {
 
     @FXML
     private void initialize() {
+        if (postTable != null) {
+            postTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            postTable.setPlaceholder(new Label("Сохранённых записей пока нет."));
+        }
+
         colTitle.setCellValueFactory(cell ->
-                new SimpleStringProperty(cell.getValue().getTitle())
+                new SimpleStringProperty(safe(cell.getValue() != null ? cell.getValue().getTitle() : null, "(без названия)"))
         );
 
         colAuthor.setCellValueFactory(cell -> {
             Post p = cell.getValue();
-            String authorName = (p.getAuthor() != null && p.getAuthor().getFullName() != null)
-                    ? p.getAuthor().getFullName()
+            String authorName = (p != null && p.getAuthor() != null)
+                    ? safe(p.getAuthor().getFullName(), "(нет автора)")
                     : "(нет автора)";
             return new SimpleStringProperty(authorName);
         });
 
         colTopic.setCellValueFactory(cell -> {
             Post p = cell.getValue();
-            String topicName = (p.getTopic() != null && p.getTopic().getName() != null)
-                    ? p.getTopic().getName()
+            String topicName = (p != null && p.getTopic() != null)
+                    ? safe(p.getTopic().getName(), "(без темы)")
                     : "(без темы)";
             return new SimpleStringProperty(topicName);
         });
 
         colCreatedAt.setCellValueFactory(cell -> {
             Post p = cell.getValue();
-            String text = (p.getCreatedAt() != null)
+            String text = (p != null && p.getCreatedAt() != null)
                     ? p.getCreatedAt().format(dateFormatter)
                     : "";
             return new SimpleStringProperty(text);
@@ -78,9 +74,8 @@ public class SavedPostsController implements MainChildController {
 
     private void loadSavedPosts() {
         User current = Session.getCurrentUser();
-        if (current == null) {
-            System.out.println("SavedPostsController: нет текущего пользователя, таблица пустая.");
-            postTable.setItems(FXCollections.observableArrayList());
+        if (current == null || current.getId() == null) {
+            postTable.setItems(FXCollections.observableArrayList(Collections.emptyList()));
             return;
         }
 
@@ -88,17 +83,20 @@ public class SavedPostsController implements MainChildController {
         try {
             List<Post> posts = em.createQuery(
                             "SELECT p FROM SavedPost sp " +
-                                    "JOIN sp.post p " +
+                                    "JOIN sp.post p " +              
                                     "JOIN FETCH p.author " +
                                     "JOIN FETCH p.topic " +
-                                    "WHERE sp.user = :user",
+                                    "WHERE sp.user.id = :uid " +
+                                    "ORDER BY sp.savedAt DESC",
                             Post.class
                     )
-                    .setParameter("user", current)
+                    .setParameter("uid", current.getId())
                     .getResultList();
 
-            System.out.println("SavedPostsController.loadSavedPosts() -> size = " + posts.size());
             postTable.setItems(FXCollections.observableArrayList(posts));
+        } catch (Exception e) {
+            e.printStackTrace();
+            postTable.setItems(FXCollections.observableArrayList(Collections.emptyList()));
         } finally {
             em.close();
         }
@@ -109,8 +107,7 @@ public class SavedPostsController implements MainChildController {
             TableRow<Post> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    Post selected = row.getItem();
-                    openPostDetail(selected);
+                    openPostDetail(row.getItem());
                 }
             });
             return row;
@@ -127,42 +124,54 @@ public class SavedPostsController implements MainChildController {
     @FXML
     private void handleUnsave() {
         Post selected = postTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Информация");
-            alert.setHeaderText(null);
-            alert.setContentText("Выберите запись в списке, чтобы удалить из сохранённых.");
-            alert.showAndWait();
+        if (selected == null || selected.getId() == null) {
+            showAlert(Alert.AlertType.INFORMATION,
+                    "Информация",
+                    null,
+                    "Выберите запись в списке, чтобы удалить из сохранённых.");
             return;
         }
 
         User current = Session.getCurrentUser();
-        if (current == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Ошибка");
-            alert.setHeaderText(null);
-            alert.setContentText("Не удалось найти текущего пользователя.");
-            alert.showAndWait();
+        if (current == null || current.getId() == null) {
+            showAlert(Alert.AlertType.WARNING,
+                    "Ошибка",
+                    null,
+                    "Не удалось найти текущего пользователя.");
             return;
         }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Подтверждение");
+        confirm.setHeaderText(null);
+        confirm.setContentText("Удалить выбранную запись из сохранённых?");
+        var res = confirm.showAndWait();
+        if (res.isEmpty() || res.get() != ButtonType.OK) return;
 
         EntityManager em = JpaUtil.getEntityManager();
         try {
             em.getTransaction().begin();
             int deleted = em.createQuery(
-                            "DELETE FROM SavedPost sp WHERE sp.user = :user AND sp.post = :post")
-                    .setParameter("user", current)
-                    .setParameter("post", selected)
+                            "DELETE FROM SavedPost sp WHERE sp.user.id = :uid AND sp.post.id = :pid"
+                    )
+                    .setParameter("uid", current.getId())
+                    .setParameter("pid", selected.getId())
                     .executeUpdate();
             em.getTransaction().commit();
 
-            System.out.println("Unsave result, rows deleted = " + deleted);
-
-        } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
+            if (deleted == 0) {
+                showAlert(Alert.AlertType.INFORMATION,
+                        "Информация",
+                        null,
+                        "Запись уже была удалена из сохранённых.");
             }
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) em.getTransaction().rollback();
             e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR,
+                    "Ошибка",
+                    null,
+                    "Не удалось удалить запись из сохранённых.");
         } finally {
             em.close();
         }
@@ -175,5 +184,19 @@ public class SavedPostsController implements MainChildController {
         if (mainController != null) {
             mainController.openReaderPage();
         }
+    }
+
+    private String safe(String s, String fallback) {
+        if (s == null) return fallback;
+        String t = s.trim();
+        return t.isEmpty() ? fallback : t;
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String header, String content) {
+        Alert a = new Alert(type);
+        a.setTitle(title);
+        a.setHeaderText(header);
+        a.setContentText(content);
+        a.showAndWait();
     }
 }

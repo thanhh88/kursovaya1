@@ -31,10 +31,14 @@
             <!-- Row 2: Mode tabs (centered) -->
             <HBox spacing="0" alignment="CENTER">
                 <children>
-                    <Button text="ЧИТАТЕЛЬ"
+                    <!-- ✅ FIX: add fx:id to match MainController fields -->
+                    <Button fx:id="readerModeButton"
+                            text="ЧИТАТЕЛЬ"
                             onAction="#openReader"
                             styleClass="mode-tab"/>
-                    <Button text="БЛОГГЕР"
+
+                    <Button fx:id="bloggerModeButton"
+                            text="БЛОГГЕР"
                             onAction="#openBlogger"
                             styleClass="mode-tab"/>
                 </children>

@@ -33,8 +33,6 @@ public class LandingController {
 
             Stage stage = (Stage) rootPane.getScene().getWindow();
             Scene scene = stage.getScene();
-
-            // 🔥 Không tạo Scene mới, chỉ đổi root
             scene.setRoot(newRoot);
             stage.setTitle(title);
 

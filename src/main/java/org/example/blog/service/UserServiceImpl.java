@@ -2,6 +2,7 @@ package org.example.blog.service;
 
 import org.example.blog.dao.UserDao;
 import org.example.blog.model.User;
+import org.example.blog.util.PasswordUtil;
 
 public class UserServiceImpl implements UserService {
 
@@ -13,15 +14,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean register(User user) {
-        if (user == null || user.getUsername() == null || user.getPasswordHash() == null) {
-            return false;
-        }
-        // kiểm tra trùng username
-        User existing = userDao.findByUsername(user.getUsername());
-        if (existing != null) {
-            return false;
-        }
-        // TODO: nếu muốn, sau này hash password
+        if (user == null) return false;
+
+        String username = user.getUsername();
+        String rawPassword = user.getPasswordHash(); // hiện UI đang set vào passwordHash (raw). Giữ logic, nhưng sẽ hash lại.
+
+        if (username == null || username.isBlank()) return false;
+        if (rawPassword == null || rawPassword.isBlank()) return false;
+
+        // Проверьте наличие повторяющихся имен пользователей.
+        User existing = userDao.findByUsername(username.trim());
+        if (existing != null) return false;
+
+        // HASH password
+        user.setUsername(username.trim());
+        user.setPasswordHash(PasswordUtil.hashPassword(rawPassword));
+
         return userDao.save(user);
     }
 
@@ -29,13 +37,18 @@ public class UserServiceImpl implements UserService {
     public User login(String username, String password) {
         if (username == null || password == null) return null;
 
-        User user = userDao.findByUsername(username);
+        User user = userDao.findByUsername(username.trim());
         if (user == null) return null;
 
-        // tạm thời so sánh plain text
-        if (password.equals(user.getPasswordHash())) {
+        String stored = user.getPasswordHash();
+        if (stored == null) return null;
+        if (PasswordUtil.verifyPassword(password, stored)) {
             return user;
         }
+        if (password.equals(stored)) {
+            return user;
+        }
+
         return null;
     }
 
@@ -47,9 +60,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean updateProfile(User user) {
-        if (user == null || user.getId() == null) {
-            return false;
-        }
+        if (user == null || user.getId() == null) return false;
         return userDao.update(user);
     }
 }

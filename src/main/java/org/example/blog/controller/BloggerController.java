@@ -71,7 +71,7 @@ public class BloggerController implements MainChildController {
             return new SimpleStringProperty(topicName);
         });
 
-        // 🔹 Dùng PostStatus (строки на русском) вместо "PUBLISHED"/"DRAFT"
+        // строки на русском вместо "PUBLISHED"/"DRAFT"
         colStatus.setCellValueFactory(c -> {
             String status = c.getValue().getStatus();
             String display;

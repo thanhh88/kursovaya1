@@ -36,7 +36,7 @@
                     <Label text="Группа: Пи23-2"
                            styleClass="label-subtitle"/>
 
-                    <Label text="Предмет: Современные технологии"
+                    <Label text="Предмет: Современные технологии программирования"
                            styleClass="label-subtitle"/>
                 </VBox>
 

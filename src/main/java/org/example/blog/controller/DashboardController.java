@@ -12,6 +12,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import org.example.blog.model.PostStatus;
 import org.example.blog.model.User;
 import org.example.blog.service.DashboardService;
 import org.example.blog.service.DashboardService.ReaderTopicStat;
@@ -21,9 +22,7 @@ import org.example.blog.session.Session;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DashboardController implements MainChildController {
@@ -73,10 +72,17 @@ public class DashboardController implements MainChildController {
     @FXML
     private void initialize() {
         currentUser = Session.getCurrentUser();
-        if (currentUser == null) {
+        if (currentUser == null || currentUser.getId() == null) {
             messageLabel.setStyle("-fx-text-fill: red;");
             messageLabel.setText("Нет активного пользователя (пользователь не авторизован).");
             return;
+        }
+
+        if (topicTable != null) {
+            topicTable.setPlaceholder(new Label("Нет данных по темам."));
+        }
+        if (topPostsTable != null) {
+            topPostsTable.setPlaceholder(new Label("Нет данных для Top Posts."));
         }
 
         if (colTopicName != null) {
@@ -115,11 +121,15 @@ public class DashboardController implements MainChildController {
     private void loadStats() {
         try {
             long total = dashboardService.countPosts(currentUser);
-            long published = dashboardService.countPostsByStatus(currentUser, "PUBLISHED");
-            long draft = dashboardService.countPostsByStatus(currentUser, "DRAFT");
+
+            //ВАЖНО: статусы хранятся в БД на русском (PostStatus)
+            long published = dashboardService.countPostsByStatus(currentUser, PostStatus.PUBLISHED);
+            long draft = dashboardService.countPostsByStatus(currentUser, PostStatus.DRAFT);
+
             long comments = dashboardService.countComments(currentUser);
             long saved = dashboardService.countSavedPosts(currentUser);
             long totalViews = dashboardService.countTotalViews(currentUser);
+
             List<TopicPostCount> topicCounts =
                     dashboardService.countPostsByTopic(currentUser);
 
@@ -151,24 +161,18 @@ public class DashboardController implements MainChildController {
                 topPostsTable.setItems(data);
             }
 
+            // Reader stats
             long readerSaved = dashboardService.countSavedPosts(currentUser);
             long readerCommentedPosts = dashboardService.countCommentedPosts(currentUser);
             long readerViewed = dashboardService.countViewedPostsByUser(currentUser);
             int streak = dashboardService.getReadingStreak(currentUser);
 
-            if (lblReaderSaved != null) {
-                lblReaderSaved.setText(String.valueOf(readerSaved));
-            }
-            if (lblReaderCommentedPosts != null) {
-                lblReaderCommentedPosts.setText(String.valueOf(readerCommentedPosts));
-            }
-            if (lblReaderViewed != null) {
-                lblReaderViewed.setText(String.valueOf(readerViewed));
-            }
-            if (lblReaderStreak != null) {
-                lblReaderStreak.setText(String.valueOf(streak));
-            }
+            if (lblReaderSaved != null) lblReaderSaved.setText(String.valueOf(readerSaved));
+            if (lblReaderCommentedPosts != null) lblReaderCommentedPosts.setText(String.valueOf(readerCommentedPosts));
+            if (lblReaderViewed != null) lblReaderViewed.setText(String.valueOf(readerViewed));
+            if (lblReaderStreak != null) lblReaderStreak.setText(String.valueOf(streak));
 
+            // Views chart (30 days)
             if (readerViewsChart != null) {
                 readerViewsChart.getData().clear();
 
@@ -188,13 +192,14 @@ public class DashboardController implements MainChildController {
                 for (LocalDate day : days) {
                     Long count = dailyViews.get(day);
                     series.getData().add(
-                            new XYChart.Data<>(day.format(dateFormatter), count)
+                            new XYChart.Data<>(day.format(dateFormatter), count != null ? count : 0L)
                     );
                 }
 
                 readerViewsChart.getData().add(series);
             }
 
+            // Reader topics pie
             if (readerTopicsPieChart != null) {
                 readerTopicsPieChart.getData().clear();
 
@@ -228,6 +233,7 @@ public class DashboardController implements MainChildController {
 
             messageLabel.setStyle("-fx-text-fill: gray;");
             messageLabel.setText("Статистика для аккаунта: " + currentUser.getUsername());
+
         } catch (Exception e) {
             e.printStackTrace();
             messageLabel.setStyle("-fx-text-fill: red;");

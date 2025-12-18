@@ -38,15 +38,34 @@ public class CommentService {
         try {
             tx.begin();
 
+            // Используйте управляемые сущности, чтобы избежать проблем с отсоединенными/временными объектами.
+            Post managedPost = em.find(Post.class, post.getId());
+            User managedAuthor = em.find(User.class, author.getId());
+
+            if (managedPost == null) {
+                throw new IllegalArgumentException("Post not found: " + post.getId());
+            }
+            if (managedAuthor == null) {
+                throw new IllegalArgumentException("Author not found: " + author.getId());
+            }
+
             Comment c = new Comment();
-            c.setPost(post);
-            c.setAuthor(author);
-            c.setContent(content);
+            c.setPost(managedPost);
+            c.setAuthor(managedAuthor);
+            c.setContent(content.trim());
             c.setCreatedAt(LocalDateTime.now());
 
             em.persist(c);
 
+            // Увеличьте количество комментариев к публикации.
+            Integer cnt = managedPost.getCommentsCount();
+            if (cnt == null) cnt = 0;
+            managedPost.setCommentsCount(cnt + 1);
+            em.merge(managedPost);
+
             tx.commit();
+            post.setCommentsCount(managedPost.getCommentsCount());
+
             return c;
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();

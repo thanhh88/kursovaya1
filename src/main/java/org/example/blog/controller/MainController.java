@@ -29,9 +29,7 @@ public class MainController {
 
     private final UserService userService = new UserServiceImpl(new UserDaoImpl());
 
-    // ============================================================
-    //  HÀM LOAD FXML CHUNG
-    // ============================================================
+    //  ОБЩАЯ ФУНКЦИЯ ЗАГРУЗКИ FXML
 
     private Object setCenterView(String fxmlPath) {
         try {
@@ -51,10 +49,7 @@ public class MainController {
         }
     }
 
-    // ============================================================
     //  INIT
-    // ============================================================
-
     public void setCurrentUser(User user) {
         this.currentUser = user;
         Session.setCurrentUser(user);
@@ -73,14 +68,12 @@ public class MainController {
             welcomeLabel.setText("Здравствуйте, " + currentUser.getFullName());
         }
 
-        // ⭐ Mặc định mở Reader mode
+        // Mặc định mở Reader mode
         openReaderPage();
         updateModeTabs("reader");
     }
 
-    // ============================================================
 //  MODE READER
-// ============================================================
 
     @FXML
     private void openReader() {
@@ -95,10 +88,7 @@ public class MainController {
         }
     }
 
-    // ============================================================
     //  MODE BLOGGER
-    // ============================================================
-
     @FXML
     public void openBlogger() {
         openBloggerPage();
@@ -109,20 +99,14 @@ public class MainController {
         setCenterView("/org/example/blog/view/blogger-view.fxml");
     }
 
-    // ============================================================
     //  DASHBOARD
-    // ============================================================
-
     @FXML
     private void openDashboard() {
         updateModeTabs(null);
         setCenterView("/org/example/blog/view/dashboard-view.fxml");
     }
 
-    // ============================================================
     //  ACCOUNT
-    // ============================================================
-
     @FXML
     private void openAccount() {
         updateModeTabs(null);
@@ -138,20 +122,14 @@ public class MainController {
         }
     }
 
-    // ============================================================
     //  SAVED POSTS
-    // ============================================================
-
     @FXML
     private void openSavedPosts() {
         updateModeTabs(null);
         setCenterView("/org/example/blog/view/saved-posts-view.fxml");
     }
 
-    // ============================================================
     //  POST DETAIL
-    // ============================================================
-
     public void openPostDetailPage(Post post) {
         if (post == null) return;
 
@@ -172,10 +150,7 @@ public class MainController {
         }
     }
 
-    // ============================================================
-    //  POST FORM (TẠO / SỬA)
-    // ============================================================
-
+    //  POST FORM
     public void openPostFormPage(Post editingPost) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -202,10 +177,7 @@ public class MainController {
         setCenterView("/org/example/blog/view/author-view.fxml");
     }
 
-    // ============================================================
-    //  ⭐ UPDATE MODE TABS UI
-    // ============================================================
-
+    //  UPDATE MODE TABS UI
     public void updateModeTabs(String mode) {
 
         if (readerModeButton == null || bloggerModeButton == null) return;
@@ -225,10 +197,7 @@ public class MainController {
         }
     }
 
-    // ============================================================
-    //  LOGOUT → Quay lại Landing page
-    // ============================================================
-
+    //  LOGOUT → Landing page
     @FXML
     private void handleLogout() {
         Session.setCurrentUser(null);

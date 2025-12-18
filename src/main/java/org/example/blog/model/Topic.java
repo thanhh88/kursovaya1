@@ -27,23 +27,17 @@ public class Topic {
     @ManyToMany(mappedBy = "favoriteTopics")
     private Set<User> users = new HashSet<>();
 
-    // =====================
     // Constructors
-    // =====================
 
-    // Bắt buộc JPA phải có
     public Topic() {
     }
-
-    // Constructor tiện dụng
+    // Constructor
     public Topic(String name, String description) {
         this.name = name;
         this.description = description;
     }
 
-    // =====================
     // Getters & Setters
-    // =====================
 
     public Long getId() {
         return id;

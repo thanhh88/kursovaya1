@@ -19,9 +19,7 @@
 
         <hibernate.version>5.6.15.Final</hibernate.version>
 
-        <!-- Version JavaFX -->
         <javafx.version>21.0.3</javafx.version>
-        <!-- Version plugin JavaFX Maven (ổn, dễ dùng) -->
         <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
     </properties>
 

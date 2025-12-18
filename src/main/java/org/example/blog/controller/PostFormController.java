@@ -16,11 +16,9 @@ import org.example.blog.util.JpaUtil;
 
 import javax.persistence.EntityManager;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 public class PostFormController implements MainChildController {
@@ -49,12 +47,15 @@ public class PostFormController implements MainChildController {
 
     @FXML
     private void initialize() {
-        // Состояния записей (на русском, как в БД)
         statusCombo.getItems().setAll(
                 PostStatus.DRAFT,
                 PostStatus.PUBLISHED
         );
         loadTopicsFromDb();
+
+        if (thumbnailFileLabel != null) {
+            thumbnailFileLabel.setText("Нет выбранного файла");
+        }
     }
 
     private void loadTopicsFromDb() {
@@ -64,6 +65,9 @@ public class PostFormController implements MainChildController {
                     "SELECT t FROM Topic t ORDER BY t.name", Topic.class
             ).getResultList();
             topicCombo.getItems().setAll(topics);
+        } catch (Exception e) {
+            e.printStackTrace();
+            topicCombo.getItems().setAll(Collections.emptyList());
         } finally {
             em.close();
         }
@@ -73,15 +77,16 @@ public class PostFormController implements MainChildController {
         this.editingPost = post;
 
         if (post != null) {
-            titleField.setText(post.getTitle());
-            contentArea.setText(post.getContent());
+            titleField.setText(safeStr(post.getTitle()));
+            contentArea.setText(safeStr(post.getContent()));
 
             if (post.getTopic() != null) {
                 topicCombo.getSelectionModel().select(post.getTopic());
+            } else {
+                topicCombo.getSelectionModel().clearSelection();
             }
 
             if (post.getStatus() != null) {
-                // post.getStatus() уже хранит строку на русском
                 statusCombo.getSelectionModel().select(post.getStatus());
             } else {
                 statusCombo.getSelectionModel().select(PostStatus.DRAFT);
@@ -89,9 +94,13 @@ public class PostFormController implements MainChildController {
 
             selectedThumbnailPath = post.getThumbnailUrl();
             updateThumbnailUI(selectedThumbnailPath);
+
+            if (post.getCreatedAt() == null) {
+                post.setCreatedAt(LocalDateTime.now()); // safety
+            }
         } else {
-            // Новый пост: по умолчанию черновик
             statusCombo.getSelectionModel().select(PostStatus.DRAFT);
+            topicCombo.getSelectionModel().clearSelection();
             selectedThumbnailPath = null;
             updateThumbnailUI(null);
         }
@@ -109,9 +118,7 @@ public class PostFormController implements MainChildController {
                 new FileChooser.ExtensionFilter("Изображения", "*.png", "*.jpg", "*.jpeg", "*.gif")
         );
 
-        File file = chooser.showOpenDialog(
-                thumbnailPreview.getScene().getWindow()
-        );
+        File file = chooser.showOpenDialog(thumbnailPreview.getScene().getWindow());
         if (file == null) return;
 
         try {
@@ -120,6 +127,7 @@ public class PostFormController implements MainChildController {
 
             String fileName = System.currentTimeMillis() + "_" + file.getName();
             Path dest = destDir.resolve(fileName);
+
             Files.copy(file.toPath(), dest, StandardCopyOption.REPLACE_EXISTING);
 
             selectedThumbnailPath = dest.toAbsolutePath().toString();
@@ -127,6 +135,10 @@ public class PostFormController implements MainChildController {
 
         } catch (Exception ex) {
             ex.printStackTrace();
+            showAlert(Alert.AlertType.ERROR,
+                    "Ошибка",
+                    "Не удалось сохранить изображение.",
+                    "Проверьте права доступа к папке images/thumbnails.");
         }
     }
 
@@ -167,7 +179,7 @@ public class PostFormController implements MainChildController {
     private void handleSave() {
         String title = titleField.getText();
         Topic topic = topicCombo.getSelectionModel().getSelectedItem();
-        String status = statusCombo.getSelectionModel().getSelectedItem(); // "Черновик"/"Опубликовано"
+        String status = statusCombo.getSelectionModel().getSelectedItem();
         String content = contentArea.getText();
 
         if (title == null || title.isBlank()
@@ -175,21 +187,19 @@ public class PostFormController implements MainChildController {
                 || status == null
                 || content == null || content.isBlank()) {
 
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Недостаточно данных");
-            alert.setHeaderText(null);
-            alert.setContentText("Пожалуйста, заполните поля: Заголовок, Тема, Статус и Содержание.");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.WARNING,
+                    "Недостаточно данных",
+                    null,
+                    "Пожалуйста, заполните поля: Заголовок, Тема, Статус и Содержание.");
             return;
         }
 
         User current = Session.getCurrentUser();
-        if (current == null) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Ошибка");
-            alert.setHeaderText(null);
-            alert.setContentText("Не удалось найти текущего пользователя.");
-            alert.showAndWait();
+        if (current == null || current.getId() == null) {
+            showAlert(Alert.AlertType.ERROR,
+                    "Ошибка",
+                    null,
+                    "Не удалось найти текущего пользователя.");
             return;
         }
 
@@ -202,20 +212,34 @@ public class PostFormController implements MainChildController {
             p.setSavedCount(0);
         } else {
             p = editingPost;
+            if (p.getCreatedAt() == null) {
+                p.setCreatedAt(LocalDateTime.now());
+            }
         }
 
         p.setAuthor(current);
-        p.setTitle(title);
+        p.setTitle(title.trim());
         p.setTopic(topic);
-        p.setStatus(status);               // <- сохраняем строку на русском
-        p.setContent(content);
+        p.setStatus(status); // строка на русском (как в БД)
+        p.setContent(content.trim());
         p.setUpdatedAt(LocalDateTime.now());
         p.setThumbnailUrl(selectedThumbnailPath);
 
-        postService.savePost(p);
+        try {
+            postService.savePost(p);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR,
+                    "Ошибка",
+                    "Не удалось сохранить запись.",
+                    "Проверьте подключение к базе данных.");
+            return;
+        }
 
         if (onSaveCallback != null) {
-            onSaveCallback.run();
+            try {
+                onSaveCallback.run();
+            } catch (Exception ignored) {}
         }
 
         navigateBackToBlogger();
@@ -241,5 +265,17 @@ public class PostFormController implements MainChildController {
                 stage.close();
             }
         }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    private String safeStr(String s) {
+        return s == null ? "" : s;
     }
 }

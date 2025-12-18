@@ -5,6 +5,7 @@ import org.example.blog.model.PostStatus;
 import org.example.blog.model.Topic;
 import org.example.blog.model.User;
 import org.example.blog.util.JpaUtil;
+import org.example.blog.util.PasswordUtil;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -14,6 +15,30 @@ import java.util.HashSet;
 
 public class SeedSampleDataMain {
 
+    // ====== 15 thumbnails in resources ======
+    // Put these files in: src/main/resources/images/thumbnails/
+    private static final String[] THUMBS = new String[] {
+            "classpath:/images/thumbnails/t01.jpg",
+            "classpath:/images/thumbnails/t02.jpg",
+            "classpath:/images/thumbnails/t03.jpg",
+            "classpath:/images/thumbnails/t04.jpg",
+            "classpath:/images/thumbnails/t05.jpg",
+            "classpath:/images/thumbnails/t06.jpg",
+            "classpath:/images/thumbnails/t07.jpg",
+            "classpath:/images/thumbnails/t08.jpg",
+            "classpath:/images/thumbnails/t09.jpg",
+            "classpath:/images/thumbnails/t10.jpg",
+            "classpath:/images/thumbnails/t11.jpg",
+            "classpath:/images/thumbnails/t12.jpg",
+            "classpath:/images/thumbnails/t13.jpg",
+            "classpath:/images/thumbnails/t14.jpg",
+            "classpath:/images/thumbnails/t15.jpg"
+    };
+
+    private static String thumb(int index0Based) {
+        return THUMBS[index0Based % THUMBS.length];
+    }
+
     public static void main(String[] args) {
 
         EntityManager em = JpaUtil.getEntityManager();
@@ -22,7 +47,7 @@ public class SeedSampleDataMain {
         try {
             tx.begin();
 
-            // ================== 1) TOPICS (10 CHỦ ĐỀ TIẾNG NGA) ==================
+            // ================== 1) TOPICS ==================
             Topic t1  = new Topic("Технологии и IT",
                     "Статьи о программировании, гаджетах, искусственном интеллекте и новых технологиях.");
             Topic t2  = new Topic("Путешествия и культура стран",
@@ -47,10 +72,13 @@ public class SeedSampleDataMain {
             em.persist(t1);  em.persist(t2);  em.persist(t3);  em.persist(t4);  em.persist(t5);
             em.persist(t6);  em.persist(t7);  em.persist(t8);  em.persist(t9);  em.persist(t10);
 
-            // ================== 2) USERS (5 TÁC GIẢ) ==================
+            // ================== 2) USERS (5 AUTHORS) ==================
+            // IMPORTANT: hash password so UserServiceImpl.login() can verify it.
+            String hashed1234 = PasswordUtil.hashPassword("1234");
+
             User u1 = new User();
             u1.setUsername("anna_blog");
-            u1.setPasswordHash("1234");
+            u1.setPasswordHash(hashed1234);
             u1.setFullName("Анна Петрова");
             u1.setAge(21);
             u1.setCountry("Россия");
@@ -60,7 +88,7 @@ public class SeedSampleDataMain {
 
             User u2 = new User();
             u2.setUsername("dima_travel");
-            u2.setPasswordHash("1234");
+            u2.setPasswordHash(hashed1234);
             u2.setFullName("Дмитрий Нгуен");
             u2.setAge(23);
             u2.setCountry("Вьетнам");
@@ -70,7 +98,7 @@ public class SeedSampleDataMain {
 
             User u3 = new User();
             u3.setUsername("oleg_dev");
-            u3.setPasswordHash("1234");
+            u3.setPasswordHash(hashed1234);
             u3.setFullName("Олег Иванов");
             u3.setAge(25);
             u3.setCountry("Россия");
@@ -80,7 +108,7 @@ public class SeedSampleDataMain {
 
             User u4 = new User();
             u4.setUsername("maria_art");
-            u4.setPasswordHash("1234");
+            u4.setPasswordHash(hashed1234);
             u4.setFullName("Мария Ким");
             u4.setAge(20);
             u4.setCountry("Корея");
@@ -90,7 +118,7 @@ public class SeedSampleDataMain {
 
             User u5 = new User();
             u5.setUsername("sergey_life");
-            u5.setPasswordHash("1234");
+            u5.setPasswordHash(hashed1234);
             u5.setFullName("Сергей Лебедев");
             u5.setAge(28);
             u5.setCountry("Германия");
@@ -100,9 +128,10 @@ public class SeedSampleDataMain {
 
             LocalDateTime now = LocalDateTime.now();
 
-            // ================== 3) POSTS (20 BÀI, MỖI AUTHOR 4 BÀI) ==================
+            // ================== 3) POSTS (20 posts, use only 15 thumbs) ==================
+            int i = 0;
 
-            // ------- Автор 1: Анна (u1) -------
+            // ------- Анна (u1) -------
             Post a1 = new Post();
             a1.setAuthor(u1);
             a1.setTopic(t1);
@@ -112,31 +141,29 @@ public class SeedSampleDataMain {
             a1.setStatus(PostStatus.PUBLISHED);
             a1.setViews(48); a1.setCommentsCount(3); a1.setSavedCount(5);
             a1.setCreatedAt(now.minusDays(6));
-            a1.setThumbnailUrl("https://picsum.photos/seed/a1/600/350");
+            a1.setThumbnailUrl(thumb(i++));
             em.persist(a1);
 
             Post a2 = new Post();
             a2.setAuthor(u1);
             a2.setTopic(t3);
             a2.setTitle("Как вести конспекты так, чтобы их хотелось перечитывать");
-            a2.setContent("Несколько простых приёмов оформления конспектов, "
-                    + "которые помогают лучше запоминать материал и не терять мотивацию.");
+            a2.setContent("Несколько простых приёмов оформления конспектов, которые помогают лучше запоминать материал.");
             a2.setStatus(PostStatus.PUBLISHED);
             a2.setViews(30); a2.setCommentsCount(1); a2.setSavedCount(4);
             a2.setCreatedAt(now.minusDays(4));
-            a2.setThumbnailUrl("https://picsum.photos/seed/a2/600/350");
+            a2.setThumbnailUrl(thumb(i++));
             em.persist(a2);
 
             Post a3 = new Post();
             a3.setAuthor(u1);
             a3.setTopic(t6);
             a3.setTitle("Пять книг, которые изменили мой взгляд на учёбу");
-            a3.setContent("Краткие заметки о книгах по саморазвитию и учебе, "
-                    + "которые помогли мне перестать всё откладывать на потом.");
+            a3.setContent("Краткие заметки о книгах по саморазвитию и учебе, которые помогли мне перестать откладывать.");
             a3.setStatus(PostStatus.PUBLISHED);
             a3.setViews(26); a3.setCommentsCount(2); a3.setSavedCount(6);
             a3.setCreatedAt(now.minusDays(2));
-            a3.setThumbnailUrl("https://picsum.photos/seed/a3/600/350");
+            a3.setThumbnailUrl(thumb(i++));
             em.persist(a3);
 
             Post a4 = new Post();
@@ -147,10 +174,10 @@ public class SeedSampleDataMain {
             a4.setStatus(PostStatus.DRAFT);
             a4.setViews(3); a4.setCommentsCount(0); a4.setSavedCount(0);
             a4.setCreatedAt(now.minusDays(1));
-            a4.setThumbnailUrl("https://picsum.photos/seed/a4/600/350");
+            a4.setThumbnailUrl(thumb(i++));
             em.persist(a4);
 
-            // ------- Автор 2: Дмитрий (u2) -------
+            // ------- Дмитрий (u2) -------
             Post d1 = new Post();
             d1.setAuthor(u2);
             d1.setTopic(t2);
@@ -159,7 +186,7 @@ public class SeedSampleDataMain {
             d1.setStatus(PostStatus.PUBLISHED);
             d1.setViews(55); d1.setCommentsCount(4); d1.setSavedCount(7);
             d1.setCreatedAt(now.minusDays(10));
-            d1.setThumbnailUrl("https://picsum.photos/seed/d1/600/350");
+            d1.setThumbnailUrl(thumb(i++));
             em.persist(d1);
 
             Post d2 = new Post();
@@ -170,7 +197,7 @@ public class SeedSampleDataMain {
             d2.setStatus(PostStatus.PUBLISHED);
             d2.setViews(40); d2.setCommentsCount(2); d2.setSavedCount(5);
             d2.setCreatedAt(now.minusDays(7));
-            d2.setThumbnailUrl("https://picsum.photos/seed/d2/600/350");
+            d2.setThumbnailUrl(thumb(i++));
             em.persist(d2);
 
             Post d3 = new Post();
@@ -181,7 +208,7 @@ public class SeedSampleDataMain {
             d3.setStatus(PostStatus.PUBLISHED);
             d3.setViews(33); d3.setCommentsCount(3); d3.setSavedCount(4);
             d3.setCreatedAt(now.minusDays(5));
-            d3.setThumbnailUrl("https://picsum.photos/seed/d3/600/350");
+            d3.setThumbnailUrl(thumb(i++));
             em.persist(d3);
 
             Post d4 = new Post();
@@ -192,10 +219,10 @@ public class SeedSampleDataMain {
             d4.setStatus(PostStatus.DRAFT);
             d4.setViews(1); d4.setCommentsCount(0); d4.setSavedCount(0);
             d4.setCreatedAt(now.minusDays(2));
-            d4.setThumbnailUrl("https://picsum.photos/seed/d4/600/350");
+            d4.setThumbnailUrl(thumb(i++));
             em.persist(d4);
 
-            // ------- Автор 3: Олег (u3) -------
+            // ------- Олег (u3) -------
             Post o1 = new Post();
             o1.setAuthor(u3);
             o1.setTopic(t1);
@@ -204,7 +231,7 @@ public class SeedSampleDataMain {
             o1.setStatus(PostStatus.PUBLISHED);
             o1.setViews(70); o1.setCommentsCount(5); o1.setSavedCount(8);
             o1.setCreatedAt(now.minusDays(12));
-            o1.setThumbnailUrl("https://picsum.photos/seed/o1/600/350");
+            o1.setThumbnailUrl(thumb(i++));
             em.persist(o1);
 
             Post o2 = new Post();
@@ -215,7 +242,7 @@ public class SeedSampleDataMain {
             o2.setStatus(PostStatus.PUBLISHED);
             o2.setViews(29); o2.setCommentsCount(1); o2.setSavedCount(3);
             o2.setCreatedAt(now.minusDays(9));
-            o2.setThumbnailUrl("https://picsum.photos/seed/o2/600/350");
+            o2.setThumbnailUrl(thumb(i++));
             em.persist(o2);
 
             Post o3 = new Post();
@@ -226,7 +253,7 @@ public class SeedSampleDataMain {
             o3.setStatus(PostStatus.PUBLISHED);
             o3.setViews(61); o3.setCommentsCount(6); o3.setSavedCount(5);
             o3.setCreatedAt(now.minusDays(3));
-            o3.setThumbnailUrl("https://picsum.photos/seed/o3/600/350");
+            o3.setThumbnailUrl(thumb(i++));
             em.persist(o3);
 
             Post o4 = new Post();
@@ -237,10 +264,10 @@ public class SeedSampleDataMain {
             o4.setStatus(PostStatus.DRAFT);
             o4.setViews(2); o4.setCommentsCount(0); o4.setSavedCount(0);
             o4.setCreatedAt(now.minusDays(1));
-            o4.setThumbnailUrl("https://picsum.photos/seed/o4/600/350");
+            o4.setThumbnailUrl(thumb(i++));
             em.persist(o4);
 
-            // ------- Автор 4: Мария (u4) -------
+            // ------- Мария (u4) -------
             Post m1 = new Post();
             m1.setAuthor(u4);
             m1.setTopic(t6);
@@ -249,7 +276,7 @@ public class SeedSampleDataMain {
             m1.setStatus(PostStatus.PUBLISHED);
             m1.setViews(37); m1.setCommentsCount(3); m1.setSavedCount(4);
             m1.setCreatedAt(now.minusDays(8));
-            m1.setThumbnailUrl("https://picsum.photos/seed/m1/600/350");
+            m1.setThumbnailUrl(thumb(i++));
             em.persist(m1);
 
             Post m2 = new Post();
@@ -260,7 +287,7 @@ public class SeedSampleDataMain {
             m2.setStatus(PostStatus.PUBLISHED);
             m2.setViews(42); m2.setCommentsCount(2); m2.setSavedCount(6);
             m2.setCreatedAt(now.minusDays(6));
-            m2.setThumbnailUrl("https://picsum.photos/seed/m2/600/350");
+            m2.setThumbnailUrl(thumb(i++));
             em.persist(m2);
 
             Post m3 = new Post();
@@ -271,7 +298,7 @@ public class SeedSampleDataMain {
             m3.setStatus(PostStatus.PUBLISHED);
             m3.setViews(28); m3.setCommentsCount(1); m3.setSavedCount(3);
             m3.setCreatedAt(now.minusDays(4));
-            m3.setThumbnailUrl("https://picsum.photos/seed/m3/600/350");
+            m3.setThumbnailUrl(thumb(i++));
             em.persist(m3);
 
             Post m4 = new Post();
@@ -282,10 +309,10 @@ public class SeedSampleDataMain {
             m4.setStatus(PostStatus.DRAFT);
             m4.setViews(1); m4.setCommentsCount(0); m4.setSavedCount(0);
             m4.setCreatedAt(now.minusDays(1));
-            m4.setThumbnailUrl("https://picsum.photos/seed/m4/600/350");
+            m4.setThumbnailUrl(thumb(i++));
             em.persist(m4);
 
-            // ------- Автор 5: Сергей (u5) -------
+            // ------- Сергей (u5) -------
             Post s1 = new Post();
             s1.setAuthor(u5);
             s1.setTopic(t7);
@@ -294,7 +321,7 @@ public class SeedSampleDataMain {
             s1.setStatus(PostStatus.PUBLISHED);
             s1.setViews(50); s1.setCommentsCount(4); s1.setSavedCount(7);
             s1.setCreatedAt(now.minusDays(11));
-            s1.setThumbnailUrl("https://picsum.photos/seed/s1/600/350");
+            s1.setThumbnailUrl(thumb(i++));
             em.persist(s1);
 
             Post s2 = new Post();
@@ -305,7 +332,7 @@ public class SeedSampleDataMain {
             s2.setStatus(PostStatus.PUBLISHED);
             s2.setViews(46); s2.setCommentsCount(5); s2.setSavedCount(6);
             s2.setCreatedAt(now.minusDays(9));
-            s2.setThumbnailUrl("https://picsum.photos/seed/s2/600/350");
+            s2.setThumbnailUrl(thumb(i++));
             em.persist(s2);
 
             Post s3 = new Post();
@@ -316,7 +343,7 @@ public class SeedSampleDataMain {
             s3.setStatus(PostStatus.PUBLISHED);
             s3.setViews(39); s3.setCommentsCount(3); s3.setSavedCount(5);
             s3.setCreatedAt(now.minusDays(3));
-            s3.setThumbnailUrl("https://picsum.photos/seed/s3/600/350");
+            s3.setThumbnailUrl(thumb(i++));
             em.persist(s3);
 
             Post s4 = new Post();
@@ -327,17 +354,15 @@ public class SeedSampleDataMain {
             s4.setStatus(PostStatus.DRAFT);
             s4.setViews(2); s4.setCommentsCount(0); s4.setSavedCount(0);
             s4.setCreatedAt(now.minusDays(1));
-            s4.setThumbnailUrl("https://picsum.photos/seed/s4/600/350");
+            s4.setThumbnailUrl(thumb(i++));
             em.persist(s4);
 
             tx.commit();
-            System.out.println("✔ Демо-данные созданы: 10 тем, 5 авторов, 20 записей.");
+            System.out.println("✔ Демо-данные созданы: 10 тем, 5 авторов, 20 записей. Thumbnails: 15 local classpath images.");
 
         } catch (Exception e) {
             e.printStackTrace();
-            if (tx.isActive()) {
-                tx.rollback();
-            }
+            if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
             JpaUtil.close();

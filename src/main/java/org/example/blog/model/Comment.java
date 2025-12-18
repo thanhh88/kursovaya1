@@ -37,7 +37,7 @@ public class Comment {
         this.createdAt = LocalDateTime.now();
     }
 
-    // ===== Getter & Setter =====
+    //Getter & Setter
 
     public Long getId() {
         return id;

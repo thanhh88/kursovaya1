@@ -11,18 +11,18 @@ public class PostView {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // User nào xem
+    // Какой User просматривает
     @ManyToOne(optional = false)
     private User user;
 
-    // Xem post nào
+    // какой пост
     @ManyToOne(optional = false)
     private Post post;
 
     @Column(nullable = false)
     private LocalDateTime viewedAt = LocalDateTime.now();
 
-    // ===== constructors =====
+    //constructors
 
     public PostView() {
     }
@@ -33,7 +33,7 @@ public class PostView {
         this.viewedAt = LocalDateTime.now();
     }
 
-    // ===== getters / setters =====
+    // getters / setters
 
     public Long getId() {
         return id;

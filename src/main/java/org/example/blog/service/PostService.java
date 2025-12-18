@@ -1,122 +1,74 @@
 package org.example.blog.service;
 
+import org.example.blog.dao.PostDAO;
+import org.example.blog.dao.PostDaoImpl;
 import org.example.blog.model.Post;
-import org.example.blog.model.PostStatus;
 import org.example.blog.model.User;
-import org.example.blog.util.JpaUtil;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
 import java.util.List;
 
 public class PostService {
 
-    // ================== READER MODE ==================
+    private final PostDAO postDAO;
+
+    public PostService() {
+        this.postDAO = new PostDaoImpl();
+    }
+
+    public PostService(PostDAO postDAO) {
+        this.postDAO = postDAO;
+    }
+
+    // READER MODE
 
     public List<Post> getAllPublishedPosts() {
-        EntityManager em = JpaUtil.getEntityManager();
-        try {
-            return em.createQuery(
-                            "SELECT p FROM Post p " +
-                                    "JOIN FETCH p.author " +
-                                    "JOIN FETCH p.topic " +
-                                    "WHERE p.status = :status " +
-                                    "ORDER BY p.createdAt DESC",
-                            Post.class
-                    )
-                    .setParameter("status", PostStatus.PUBLISHED)   // <<< важный момент
-                    .getResultList();
-        } finally {
-            em.close();
+        return postDAO.findAllPublished();
+    }
+
+    public List<Post> searchPublished(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return getAllPublishedPosts();
         }
+        return postDAO.searchPublished(keyword.trim());
     }
 
     public void increaseViews(Long postId) {
-        EntityManager em = JpaUtil.getEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            Post post = em.find(Post.class, postId);
-            if (post != null) {
-                Integer current = post.getViews();
-                if (current == null) current = 0;
-                post.setViews(current + 1);
-                em.merge(post);
-            }
-            tx.commit();
-        } catch (Exception e) {
-            if (tx.isActive()) {
-                tx.rollback();
-            }
-            e.printStackTrace();
-        } finally {
-            em.close();
-        }
+        if (postId == null) return;
+
+        Post post = postDAO.findById(postId);
+        if (post == null) return;
+
+        Integer current = post.getViews();
+        if (current == null) current = 0;
+
+        post.setViews(current + 1);
+        postDAO.update(post);
     }
 
-    // ================== BLOGGER MODE ==================
+    // BLOGGER MODE
 
     public List<Post> getPostsByAuthor(User author) {
-        if (author == null) {
-            return List.of();
-        }
-        EntityManager em = JpaUtil.getEntityManager();
-        try {
-            return em.createQuery(
-                            "SELECT p FROM Post p " +
-                                    "JOIN FETCH p.topic " +
-                                    "WHERE p.author = :author " +
-                                    "ORDER BY p.createdAt DESC",
-                            Post.class
-                    )
-                    .setParameter("author", author)
-                    .getResultList();
-        } finally {
-            em.close();
-        }
+        if (author == null) return List.of();
+        return postDAO.findByAuthor(author);
     }
 
     public void savePost(Post post) {
-        EntityManager em = JpaUtil.getEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            if (post.getId() == null) {
-                em.persist(post);
-            } else {
-                em.merge(post);
-            }
-            tx.commit();
-        } catch (Exception e) {
-            if (tx.isActive()) {
-                tx.rollback();
-            }
-            e.printStackTrace();
-        } finally {
-            em.close();
+        if (post == null) return;
+
+        if (post.getId() == null) {
+            postDAO.save(post);
+        } else {
+            postDAO.update(post);
         }
     }
 
     public void deletePost(Post post) {
-        if (post == null || post.getId() == null) {
-            return;
-        }
-        EntityManager em = JpaUtil.getEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            Post managed = em.find(Post.class, post.getId());
-            if (managed != null) {
-                em.remove(managed);
-            }
-            tx.commit();
-        } catch (Exception e) {
-            if (tx.isActive()) {
-                tx.rollback();
-            }
-            e.printStackTrace();
-        } finally {
-            em.close();
-        }
+        if (post == null || post.getId() == null) return;
+        postDAO.delete(post);
+    }
+
+    public Post findById(Long id) {
+        if (id == null) return null;
+        return postDAO.findById(id);
     }
 }

@@ -54,8 +54,8 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SavedPost> savedPosts;
 
-    // N-N với Topic thông qua user_topics
-    // 👉 Quan trọng: fetch = EAGER để tránh LazyInitializationException
+    // N-N с темой через user_topics
+    // используется EAGER для избежания LazyInitializationException при работе с JavaFX UI
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_topics",
@@ -67,7 +67,7 @@ public class User {
     public User() {
     }
 
-    // --- Getters & Setters ---
+    // Getters & Setters
 
     public Long getId() {
         return id;

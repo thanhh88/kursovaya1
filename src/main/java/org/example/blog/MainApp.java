@@ -22,12 +22,10 @@ public class MainApp extends Application {
         primaryStage.setTitle("Blog System");
         primaryStage.setScene(scene);
 
-        // Cho phép resize + kích thước tối thiểu
         primaryStage.setResizable(true);
         primaryStage.setMinWidth(900);
         primaryStage.setMinHeight(600);
 
-        // ⭐⭐ MỞ FULL MÀN HÌNH KHI CHẠY ⭐⭐
         primaryStage.setMaximized(true);
 
         primaryStage.show();
