@@ -44,11 +44,11 @@
 
                 <!-- Контактные данные (обязательное требование 1.9) -->
                 <VBox spacing="4" alignment="CENTER_LEFT">
-                    <Label text="Контактные данные:"
+                    <Label text="89629922005:"
                            styleClass="label-section"/>
-                    <Label text="Email: your_email@example.com"
+                    <Label text="Email: 231416@edu.fa.ru"
                            styleClass="label-subtitle"/>
-                    <Label text="Telegram: @your_telegram"
+                    <Label text="Telegram: Thu Anh"
                            styleClass="label-subtitle"/>
                 </VBox>
 
